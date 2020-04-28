@@ -1298,7 +1298,8 @@ class SitesDataAPI(MethodView):
         features.append(feature)
         results['sites'] = geojson.FeatureCollection(features)
 
-      client_results = json.dump(results)
+      client_results = json.dumps(results)
+
       current_app.logger.debug("IP: %s SiteDataAPI processed %d features" % (request.remote_addr, len(features)))
     current_app.logger.debug('IP: %s SiteDataAPI get for site: %s finished in %f seconds' % (request.remote_addr,
                                                                                              sitename,
