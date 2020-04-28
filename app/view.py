@@ -1283,7 +1283,7 @@ class SitesDataAPI(MethodView):
           if advisory_data is not None:
             advisory_sites = advisory_data['features']
             #Find if the site has advisory data
-            ndx = locate_element(advisory_sites, lambda wq_site: wq_site['id'] == site_rec.site_name)
+            ndx = locate_element(advisory_sites, lambda wq_site: wq_site['properties']['station'] == site_rec.site_name)
             if ndx != -1:
               try:
                 if len(advisory_sites[ndx]['properties']['test']['beachadvisories']):
