@@ -126,31 +126,32 @@ def build_url_rules(app):
     SitesDataAPI
 
   #Page rules
-  app.add_url_rule('/', view_func=ShowIntroPage.as_view('follybeach_intro'))
-  app.add_url_rule('/about', view_func=ShowAboutPage.as_view('about_page'))
+  app.add_url_rule('/', view_func=ShowIntroPage.as_view('htb_intro'))
+  #app.add_url_rule('/about', view_func=ShowAboutPage.as_view('about_page'))
   #SC sites
   app.add_url_rule('/myrtlebeach', view_func=SiteMapPage.as_view('myrtlebeach'))
   app.add_url_rule('/charleston', view_func=SiteMapPage.as_view('charleston'))
+  app.add_url_rule('/follybeach', view_func=SiteMapPage.as_view('follybeach'))
 
   #app.add_url_rule('/myrtlebeach', view_func=MyrtleBeachPage.as_view('myrtlebeach'))
-  app.add_url_rule('/myrtlebeach/about', view_func=MBAboutPage.as_view('mb_about'))
+  #app.add_url_rule('/myrtlebeach/about', view_func=MBAboutPage.as_view('mb_about'))
   #app.add_url_rule('/charleston', view_func=CharlestonPage.as_view('charleston'))
-  app.add_url_rule('/charleston/about', view_func=CHSAboutPage.as_view('chs_about'))
+  #app.add_url_rule('/charleston/about', view_func=CHSAboutPage.as_view('chs_about'))
 
 
   app.add_url_rule('/follybeach_intro', view_func=FollyBeachShowIntroPage.as_view('follybeach_intro_page'))
-  app.add_url_rule('/follybeach', view_func=FollyBeachPage.as_view('follybeach'))
+  #app.add_url_rule('/follybeach', view_func=FollyBeachPage.as_view('follybeach'))
   app.add_url_rule('/follybeach/about', view_func=FollyBeachAboutPage.as_view('follybeach_about'))
   app.add_url_rule('/follybeach/camera/<string:cameraname>', view_func=FollyBeachCameraPage.as_view('follybeach_camera', cameraname='<cameraname>'))
 
   #FL Sites
   app.add_url_rule('/sarasota', view_func=SiteMapPage.as_view('sarasota'))
   #app.add_url_rule('/sarasota', view_func=SarasotaPage.as_view('sarasota'))
-  app.add_url_rule('/sarasota/about', view_func=SarasotaAboutPage.as_view('sarasota_about'))
+  #app.add_url_rule('/sarasota/about', view_func=SarasotaAboutPage.as_view('sarasota_about'))
   #NC Sites
   app.add_url_rule('/killdevilhills', view_func=SiteMapPage.as_view('killdevilhills'))
   #app.add_url_rule('/killdevilhills', view_func=KillDevilHillsPage.as_view('killdevilhills'))
-  app.add_url_rule('/killdevilhills/about', view_func=KDHAboutPage.as_view('kdh_about'))
+  #app.add_url_rule('/killdevilhills/about', view_func=KDHAboutPage.as_view('kdh_about'))
 
   #REST rules
   app.add_url_rule('/api/<string:sitename>/sites', view_func=SitesDataAPI.as_view('site_data_view'), methods=['GET'])
