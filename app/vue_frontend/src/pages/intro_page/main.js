@@ -8,7 +8,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'typeface-montserrat/index.css'
 
 Vue.config.productionTip = false;
-Vue.use(BootstrapVue)
+Vue.use(BootstrapVue);
 
 new Vue({
   render: h => h(IntroPage),

@@ -1,6 +1,8 @@
 <template>
     <div>
-        <b-card class="wq-card">
+        <b-card class="wq-card"
+                header="Water Quality Site"
+                header-tag="header">
             <!--<b-card-body>-->
             <div v-if="hasAdvisoryData">
                 <b-card-title class="font-avenir">
@@ -12,6 +14,7 @@
                 <b-card-title class="font-avenir">Site: {{feature.properties.description}}</b-card-title>
             </div>
             <b-card-sub-title class="avenir-font-light">ID: {{feature.id}}</b-card-sub-title>
+
             <div v-if="hasAdvisoryData">
                 <b-card-text class="mt-3">
                     <p>

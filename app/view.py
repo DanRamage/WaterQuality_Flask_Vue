@@ -1231,6 +1231,47 @@ class SitesDataAPI(MethodView):
     current_app.logger.debug('get_advisory_limits finished in %f seconds' % (time.time()-start_time))
     return limits
 
+  def create_shellfish_properties(self, shellfish_data, site_rec):
+    try:
+      region, site_name = site_rec.site_name.split('-')
+      if region in shellfish_data:
+        closure_data = shellfish_data[region]
+        advisory = False
+        if closure_data['Storm_Closure'].lower() == 'closed':
+          advisory = True
+        properties = {
+          'station': site_name,
+          'region': region,
+          'advisory': {
+            'date_time_last_check': closure_data['date_time_last_check'],
+            'value': advisory
+          }
+        }
+        return properties
+    except Exception as e:
+      current_app.logger.exception(e)
+    return None
+
+  def create_rip_current_properties(self, ripcurrents_data, site_rec):
+    try:
+      features = ripcurrents_data['features']
+      ndx = locate_element(features, lambda data: data['properties']['description'] == site_rec.site_name)
+
+      if ndx != -1:
+        site_data = features[ndx]['properties']
+        properties = {
+          'station': site_rec.site_name,
+          'advisory': {
+            'date': site_data['date'],
+            'value': site_data['level'],
+            'flag': site_data['flag']
+          }
+        }
+        return properties
+    except Exception as e:
+      current_app.logger.exception(e)
+    return None
+
   def get(self, sitename):
     start_time = time.time()
     current_app.logger.debug('IP: %s SiteDataAPI get for site: %s' % (request.remote_addr, sitename))
@@ -1244,6 +1285,15 @@ class SitesDataAPI(MethodView):
       ret_code = 200
       prediction_data = self.load_data_file(SITES_CONFIG[sitename]['prediction_file'])
       advisory_data = self.load_data_file(SITES_CONFIG[sitename]['advisory_file'])
+
+      #Does site have shellfish data?
+      shellfish_data = None
+      if 'shellfish_closures' in SITES_CONFIG[sitename]:
+        shellfish_data = self.load_data_file(SITES_CONFIG[sitename]['shellfish_closures'])
+      #Does site have ripcurrents data?
+      ripcurrents_data = None
+      if 'ripcurrents' in SITES_CONFIG[sitename]:
+        ripcurrents_data = self.load_data_file(SITES_CONFIG[sitename]['ripcurrents'])
 
       sample_sites = db.session.query(Sample_Site) \
         .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
@@ -1291,6 +1341,15 @@ class SitesDataAPI(MethodView):
                                                        'value': advisory_sites[ndx]['properties']['test']['beachadvisories']['value']}
               except Exception as e:
                 current_app.logger.exception(e)
+        elif site_type == 'Shellfish' and shellfish_data is not None:
+          property = self.create_shellfish_properties(shellfish_data, site_rec)
+          if property is not None:
+            properties[site_type] = property
+
+        elif site_type == 'Rip Current' and ripcurrents_data is not None:
+          property = self.create_rip_current_properties(ripcurrents_data, site_rec)
+          if property is not None:
+            properties[site_type] = property
 
         feature = geojson.Feature(id=site_rec.site_name,
                                   geometry=geojson.Point((site_rec.longitude,site_rec.latitude)),
