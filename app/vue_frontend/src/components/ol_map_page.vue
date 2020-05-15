@@ -1,71 +1,98 @@
 <template>
+    <div class="wrapper">
+    <!--
     <b-container fluid class="h-100">
-        <b-row class="h-100">
-            <b-col sm="4" md="3" lg="3" xl="3" class="padding-0">
-                <div class="h-100 px-5 py-4 montserat-font text-center text-white blue-background_color sidebar-opacity">
-                    <h6><i><span v-text="title"></span></i></h6>
-                    <h4><span v-text="site_name"></span></h4>
-                    <p class="text-left">
-                        Bacteria levels can change rapidly between sampling dates. To fill in the gaps,
-                        we make daily <b>Nowcast</b> of bacteria conditions. These predictions do not represent
-                        swimming advisories, but provide estimates of the likelihood that bacteria conditions
-                        would warrant issuing an advisory if sampling were conducted that day.
-                    </p>
-                    <b-button class="btn-outline-primary p-2 mr-2" v-bind:class="[advisoryActive ? 'active' : '']"
-                              variant="outline-primary"
-                              v-on:click="dataTypeClick('advisory')"><b>Advisory</b></b-button>
-                    <b-button class="btn-outline-primary p-2 ml-2" v-bind:class="[nowcastActive ? 'active' : '']"
-                              variant="outline-primary"
-                              v-on:click="dataTypeClick('nowcast')"><b>Nowcast</b></b-button>
-                    <p class="text-center">
-                        <a href="#" class="text-white card-link">Bacteria Sources</a>
-                    </p>
-                    <p class="text-center">
-                        <a href="#" class="text-white card-link">Locations</a>
-                    </p>
-                    <p class="text-center">
-                        <a href="#" class="text-white card-link">About</a>
-                    </p>
-                </div>
-            </b-col>
-            <b-col sm="8" md="9" lg="9" xl="9"  ref="map_column" class="padding-0">
-                <vl-map style="width: 100%; height: 100%; position:absolute" ref="site_map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true" data-projection="EPSG:4326">
-                    <vl-view :center.sync="center" :rotation.sync="rotation"></vl-view>
-                    <vl-layer-tile>
-                        <vl-source-xyz :url="layer_url" attributions="string or array" />
-                    </vl-layer-tile>
-                    <vl-layer-vector id="sites">
-                        <vl-source-vector ref="site_vector_layer" :features.sync="features"></vl-source-vector>
-                        <vl-style-func :factory="siteStyleFactory"></vl-style-func>
-                    </vl-layer-vector>
-                    <vl-interaction-select :features.sync="selectedFeatures" :layers="['sites']">
-                        <vl-overlay v-for="feature in selectedFeatures"
-                                    :key="feature.id"
-                                    :id="feature.id"
-                                    :position="feature.geometry.coordinates"
-                                    :auto-pan="true"
-                                    :auto-pan-animation="{ duration: 300 }">
-                            <div v-if='feature.properties.site_type == "Default"'>
-                                <WQPopup :feature="feature"></WQPopup>
-                            </div>
-                            <div v-else>
-                                <p>{{feature.id}}</p>
-                            </div>
-                        </vl-overlay>
+    -->
+            <!--
+            <b-button v-b-toggle.info-sidebar class="sidebar-button">?</b-button>
+             -->
+        <nav id="sidebar" v-bind:class="[sidebarActive ? 'active' : '']">
+            <div class="h-100 px-5 py-4 montserat-font text-center text-white blue-background_color sidebar-opacity">
+                <h6><i><span v-text="title"></span></i></h6>
+                <h4><span v-text="site_name"></span></h4>
+                <p class="text-left">
+                    Bacteria levels can change rapidly between sampling dates. To fill in the gaps,
+                    we make daily <b>Nowcast</b> of bacteria conditions. These predictions do not represent
+                    swimming advisories, but provide estimates of the likelihood that bacteria conditions
+                    would warrant issuing an advisory if sampling were conducted that day.
+                </p>
+                <b-button class="btn-outline-primary p-2 mr-2" v-bind:class="[advisoryActive ? 'active' : '']"
+                          variant="outline-primary"
+                          v-on:click="dataTypeClick('advisory')"><b>Advisory</b></b-button>
+                <b-button class="btn-outline-primary p-2 ml-2" v-bind:class="[nowcastActive ? 'active' : '']"
+                          variant="outline-primary"
+                          v-on:click="dataTypeClick('nowcast')"><b>Nowcast</b></b-button>
+                <p class="text-center">
+                    <a href="#" class="text-white card-link">Bacteria Sources</a>
+                </p>
+                <p class="text-center">
+                    <a href="#" class="text-white card-link">Locations</a>
+                </p>
+                <p class="text-center">
+                    <a href="#" class="text-white card-link">About</a>
+                </p>
+            </div>
+        </nav>
+        <div id="content">
+            <vl-map id="site_map"
+                    style="width: 100%; height: 100%; position:absolute"
+                    ref="site_map"
+                    :load-tiles-while-animating="true"
+                    :load-tiles-while-interacting="true"
+                    data-projection="EPSG:4326">
+                <vl-view :center.sync="center" :rotation.sync="rotation"></vl-view>
+                <vl-layer-tile>
+                    <vl-source-xyz :url="layer_url" attributions="string or array" />
+                </vl-layer-tile>
+                <vl-layer-vector id="sites">
+                    <vl-source-vector ref="site_vector_layer" :features.sync="features"></vl-source-vector>
+                    <vl-style-func :factory="siteStyleFactory"></vl-style-func>
+                </vl-layer-vector>
+                <vl-interaction-select :features.sync="selectedFeatures" :layers="['sites']">
+                    <vl-overlay v-for="feature in selectedFeatures"
+                                :key="feature.id"
+                                :id="feature.id"
+                                :position="feature.geometry.coordinates"
+                                :auto-pan="true"
+                                :auto-pan-animation="{ duration: 300 }">
+                        <div v-if='feature.properties.site_type == "Default"'>
+                            <WQPopup :feature="feature"></WQPopup>
+                        </div>
+                        <div v-else-if='feature.properties.site_type == "Shellfish"'>
+                            <ShellfishPopup :feature="feature"></ShellfishPopup>
+                        </div>
+                        <div v-else-if='feature.properties.site_type == "Rip Current"'>
+                            <RipcurrentPopup :feature="feature"></RipcurrentPopup>
+                        </div>
+                        <div v-else>
+                            <p>{{feature.id}}</p>
+                        </div>
+                    </vl-overlay>
 
-                    </vl-interaction-select>
-                </vl-map>
-            </b-col>
-        </b-row>
-    </b-container>
+                </vl-interaction-select>
+            </vl-map>
+            <b-button
+                    v-b-toggle.info-sidebar
+                    id="sidebarCollapse"
+                    class="sidebar-button blue-background_color"
+                    v-on:click="sidebarButtonClick()"
+                    v-bind:class="[sidebarActive ? 'active' : '']">
+                <span></span>
+                <span></span>
+                <span></span>
+            </b-button>
+
+        </div>
+    </div>
 </template>
 
 <script>
     import DataAPI from "../utilities/rest_api";
+    import FeatureUtils from "../utilities/feature_funcs";
     import WQPopup from "./wq_popup.vue";
     import {findPointOnSurface} from 'vuelayers/lib/ol-ext'
-    //import Extent from 'ol/extent';
-    //import {createEmpty} from 'ol/extent';
+    //import moment from 'moment';
+
     import Style from 'ol/style/Style';
     import Icon from 'ol/style/Icon';
 
@@ -74,11 +101,15 @@
     import LowMarkerIcon from '@/assets/images/low_marker_25x25.png'
     import HiMarkerIcon from '@/assets/images/high_marker_25x25.png'
     import NoneMarkerIcon from '@/assets/images/none_marker_25x25.png'
+    import ShellfishPopup from "@/components/shellfish_popup";
+    import RipcurrentPopup from "@/components/riptide_popup";
 
     export default {
         name: 'OLMapPage',
 
         components: {
+            RipcurrentPopup,
+            ShellfishPopup,
             'WQPopup': WQPopup
         },
         data () {
@@ -94,7 +125,8 @@
                 selectedFeatures: [],
                 advisory_limits: undefined,
                 nowcastActive: false,
-                advisoryActive: true
+                advisoryActive: true,
+                sidebarActive: true
                 //sitesLayerExtents: createEmpty()
             }
         },
@@ -146,35 +178,101 @@
                     let icon_scale = 0.75;
                     let properties = feature.getProperties();
                     let site_type = properties.site_type;
-                    //if(site_type in properties) {
                     let icon = new Icon({
                         src: NoneMarkerIcon,
                         scale: icon_scale
                     });
-
-                    if('advisory' in properties[site_type]) {
-                        let value = properties[site_type].advisory.value;
-                        let hi_limit = vm.$store.state.advisory_limits.hi;
-                        let lo_limit = vm.$store.state.advisory_limits.low;
-                        if(value >= hi_limit.minimum) {
-                            //console.debug("Feature: " + feature.getId() + " Hi style value: " + value);
-                            icon = new Icon({
-                                src: HiMarkerIcon,
-                                scale: icon_scale
-                            });
+                    if(site_type == 'Default')
+                    {
+                        if(vm.advisoryActive) {
+                            if ('advisory' in properties[site_type]) {
+                                let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
+                                if(dataFresh)
+                                {
+                                    let value = properties[site_type].advisory.value;
+                                    let hi_limit = vm.$store.state.advisory_limits.hi;
+                                    let lo_limit = vm.$store.state.advisory_limits.low;
+                                    if (value >= hi_limit.minimum) {
+                                        //console.debug("Feature: " + feature.getId() + " Hi style value: " + value);
+                                        icon = new Icon({
+                                            src: HiMarkerIcon,
+                                            scale: icon_scale
+                                        });
+                                    } else if (value < lo_limit.maximum) {
+                                        //console.debug("Feature: " + feature.getId() + " Low style value: " + value);
+                                        icon = new Icon({
+                                            src: LowMarkerIcon,
+                                            scale: icon_scale
+                                        });
+                                    }
+                                }
+                            } else {
+                                console.debug("Feature: " + feature.getId() + " No advisory data found.");
+                            }
                         }
-                        else if(value < lo_limit.maximum)
+                        else
                         {
-                            //console.debug("Feature: " + feature.getId() + " Low style value: " + value);
                             icon = new Icon({
-                                src: LowMarkerIcon,
+                                src: NoneMarkerIcon,
                                 scale: icon_scale
-                                //size: [50, 50]
                             });
+                            if('nowcasts' in properties[site_type]) {
+                                let level = properties[site_type].nowcasts.level;
+                                if(level == 'LOW')
+                                {
+                                    icon = new Icon({
+                                        src: LowMarkerIcon,
+                                        scale: icon_scale
+                                    });
+                                }
+                                else if(level == 'HIGH')
+                                {
+                                    icon = new Icon({
+                                        src: HiMarkerIcon,
+                                        scale: icon_scale
+                                    });
+                                }
+                            }
                         }
                     }
-                    else {
-                        console.debug("Feature: " + feature.getId() + " No advisory data found.");
+                    else if(site_type == 'Shellfish')
+                    {
+                        //First check to see if our data is still fresh.
+                        let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
+                        if(dataFresh) {
+                            //Shellfish values are either true for closed or false for open.
+                            let value = properties[site_type].advisory.value;
+                            if (!value) {
+                                icon = new Icon({
+                                    src: LowMarkerIcon,
+                                    scale: icon_scale
+                                });
+                            } else {
+                                icon = new Icon({
+                                    src: HiMarkerIcon,
+                                    scale: icon_scale
+                                });
+                            }
+                        }
+                    }
+                    else if(site_type == 'Rip Current')
+                    {
+
+                        let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
+                        if(dataFresh) {
+                            let value = properties[site_type].advisory.value;
+                            if (!value) {
+                                icon = new Icon({
+                                    src: LowMarkerIcon,
+                                    scale: icon_scale
+                                });
+                            } else {
+                                icon = new Icon({
+                                    src: HiMarkerIcon,
+                                    scale: icon_scale
+                                });
+                            }
+                        }
                     }
 
                     let icon_style = [
@@ -182,8 +280,6 @@
                             image: icon,
                         })
                     ];
-
-                //}
                     return(icon_style);
                 };
                 return siteStyleFunction;
@@ -194,13 +290,18 @@
                 {
                     this.nowcastActive = true;
                     this.advisoryActive = false;
+                    this.$refs.site_vector_layer.$source.changed();
                 }
                 else{
                     this.nowcastActive = false;
                     this.advisoryActive = true;
-
+                    this.$refs.site_vector_layer.$source.changed();
                 }
             },
+            sidebarButtonClick() {
+                this.sidebarActive = !this.sidebarActive;
+                console.debug("sidebarButtonClick clicked: " + this.sidebarActive);
+            }
             /*
             onSourceChanged () {
                 // sourceVm - vl-source-vector instance
@@ -267,18 +368,119 @@
         opacity: 0.75;
 
     }
-
+    #vl-map-site_map .ol-zoom {
+        background-color: rgba(0, 61, 126, .85) !important;
+    }
+    #vl-map-site_map .ol-zoom-out {
+        background-color: rgba(0, 61, 126, .85) !important;
+    }
+    /*
+    #vl-map-site_map .ol-zoom-in {
+        margin-top: 200px !important;
+    }
+    #vl-map-site_map .ol-zoom-out {
+        margin-top: 240px !important;
+    }
+    */
 </style>
 <style scoped>
-    .sidebar-button {
+    .wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: stretch;
+        perspective: 1500px;
+    }
+
+    #sidebar {
+        min-width: 300px;
+        max-width: 300px;
+        background: #7386D5;
+        color: #fff;
+        transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
+        transform-origin: bottom left;
+    }
+
+    #sidebar.active {
+        margin-left: -300px;
+        transform: rotateY(100deg);
+    }
+
+    #sidebar .sidebar-header {
+        padding: 20px;
+        background: #6d7fcc;
+    }
+
+    #sidebar ul.components {
+        padding: 20px 0;
+        border-bottom: 1px solid #47748b;
+    }
+
+    #sidebar ul p {
+        color: #fff;
+        padding: 10px;
+    }
+
+    #sidebar ul li a {
+        padding: 10px;
+        font-size: 1.1em;
+        display: block;
+    }
+    #sidebar ul li a:hover {
+        color: #7386D5;
+        background: #fff;
+    }
+
+    #sidebar ul li.active > a, a[aria-expanded="true"] {
+        color: #fff;
+        background: #6d7fcc;
+    }
+
+    #sidebarCollapse {
+        width: 40px;
+        height: 40px;
+        background: #f5f5f5;
+    }
+
+    #sidebarCollapse span {
+        width: 80%;
+        height: 2px;
+        margin: 0 auto;
+        display: block;
+        background: #555;
+        transition: all 0.8s cubic-bezier(0.810, -0.330, 0.345, 1.375);
+    }
+    #sidebarCollapse span:first-of-type {
+        /* rotate first one */
+        transform: rotate(45deg) translate(2px, 2px);
+    }
+    #sidebarCollapse span:nth-of-type(2) {
+        /* second one is not visible */
+        opacity: 0;
+    }
+    #sidebarCollapse span:last-of-type {
+        /* rotate third one */
+        transform: rotate(-45deg) translate(1px, -1px);
+    }
+    #sidebarCollapse.active span {
+        /* no rotation */
+        transform: none;
+        /* all bars are visible */
+        opacity: 1;
+        margin: 5px auto;
+    }
+    #sidebarCollapse {
         position: relative;
         z-index: 1000;
         top: 7em;
         left: .75em;
     }
-    .fixed-width-info-column {
-        flex: 0 0 150px;
+    #content {
+        width: 100%;
+        min-height: 100vh;
+        transition: all 0.3s;
     }
+
     .montserat-font {
         font-family: 'Montserrat';
 
@@ -292,12 +494,5 @@
     .swimmer-icon {
         width: 25px;
         height: 25px;
-    }
-    .padding-0{
-        padding-right:0;
-        padding-left:0;
-    }
-    .active-color {
-        background-color: #ffffff;
     }
 </style>
