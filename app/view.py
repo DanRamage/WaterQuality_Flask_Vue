@@ -18,8 +18,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from shapely.wkb import loads as wkb_loads
 from shapely.wkt import loads as wkt_loads
-
-from config import CURRENT_SITE_LIST, VALID_UPDATE_ADDRESSES, SITES_CONFIG
+from config import CURRENT_SITE_LIST, VALID_UPDATE_ADDRESSES, SITES_CONFIG, SITE_TYPE_DATA_VALID_TIMEOUTS
 
 from app import db
 from .admin_models import User
@@ -1231,7 +1230,7 @@ class SitesDataAPI(MethodView):
     current_app.logger.debug('get_advisory_limits finished in %f seconds' % (time.time()-start_time))
     return limits
 
-  def create_shellfish_properties(self, shellfish_data, site_rec):
+  def create_shellfish_properties(self, shellfish_data, site_rec, data_timeout):
     try:
       region, site_name = site_rec.site_name.split('-')
       if region in shellfish_data:
@@ -1243,8 +1242,9 @@ class SitesDataAPI(MethodView):
           'station': site_name,
           'region': region,
           'advisory': {
-            'date_time_last_check': closure_data['date_time_last_check'],
-            'value': advisory
+            'date': closure_data['date_time_last_check'],
+            'value': advisory,
+            'hours_data_valid': data_timeout
           }
         }
         return properties
@@ -1252,7 +1252,7 @@ class SitesDataAPI(MethodView):
       current_app.logger.exception(e)
     return None
 
-  def create_rip_current_properties(self, ripcurrents_data, site_rec):
+  def create_rip_current_properties(self, ripcurrents_data, site_rec, data_timeout):
     try:
       features = ripcurrents_data['features']
       ndx = locate_element(features, lambda data: data['properties']['description'] == site_rec.site_name)
@@ -1264,7 +1264,8 @@ class SitesDataAPI(MethodView):
           'advisory': {
             'date': site_data['date'],
             'value': site_data['level'],
-            'flag': site_data['flag']
+            'flag': site_data['flag'],
+            'hours_data_valid': data_timeout
           }
         }
         return properties
@@ -1276,8 +1277,9 @@ class SitesDataAPI(MethodView):
     start_time = time.time()
     current_app.logger.debug('IP: %s SiteDataAPI get for site: %s' % (request.remote_addr, sitename))
     ret_code = 501
-    results =  {'advisory_info' : {},
-                 'sites': {}
+    results =  {'advisory_info': {},
+                 'sites': {},
+                 'site_info': {}
                 }
 
 
@@ -1326,8 +1328,11 @@ class SitesDataAPI(MethodView):
             ndx = locate_element(prediction_sites, lambda wq_site: wq_site['properties']['station'] == site_rec.site_name)
             if ndx != -1:
               try:
+                data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
                 properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
-                                                     'level': prediction_sites[ndx]['properties']['ensemble']}
+                                                     'level': prediction_sites[ndx]['properties']['ensemble'],
+                                                     'hours_data_valid': data_timeout
+                                                     }
               except Exception as e:
                 current_app.logger.exception(e)
           if advisory_data is not None:
@@ -1337,17 +1342,21 @@ class SitesDataAPI(MethodView):
             if ndx != -1:
               try:
                 if len(advisory_sites[ndx]['properties']['test']['beachadvisories']):
+                  data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
                   properties[site_type]['advisory'] = {'date': advisory_sites[ndx]['properties']['test']['beachadvisories']['date'],
-                                                       'value': advisory_sites[ndx]['properties']['test']['beachadvisories']['value']}
+                                                       'value': advisory_sites[ndx]['properties']['test']['beachadvisories']['value'],
+                                                       'hours_data_valid': data_timeout}
               except Exception as e:
                 current_app.logger.exception(e)
         elif site_type == 'Shellfish' and shellfish_data is not None:
-          property = self.create_shellfish_properties(shellfish_data, site_rec)
+          data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+          property = self.create_shellfish_properties(shellfish_data, site_rec, data_timeout)
           if property is not None:
             properties[site_type] = property
 
         elif site_type == 'Rip Current' and ripcurrents_data is not None:
-          property = self.create_rip_current_properties(ripcurrents_data, site_rec)
+          data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+          property = self.create_rip_current_properties(ripcurrents_data, site_rec, data_timeout)
           if property is not None:
             properties[site_type] = property
 
