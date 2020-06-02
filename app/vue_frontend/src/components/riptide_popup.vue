@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="ripcurrent-popup">
         <b-card class="wq-card"
                 header="Rip Current Prediction Site"
                 header-tag="header">
@@ -17,7 +17,7 @@
                     <br>
                     <span class="ml-2 avenir-font-light">Date: {{advisoryDate}}</span>
                     <br>
-                    <b v-if="isDataFresh == false" class="ml-4 avenir-font-light">DATA IS OUT OF DATE</b>
+                    <b v-if="isDataFresh == false" class="ml-2 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
                 </p>
             </b-card-text>
 
@@ -114,6 +114,14 @@
     .avenir-font-light {
         font-family: 'Avenir';
         font-weight: lighter;
+    }
+    #ripcurrent-popup div .card-title
+    {
+        font-size: 1.0rem
+    }
+    #ripcurrent-popup div .card-subtitle
+    {
+        font-size: 1.0rem
     }
 
 

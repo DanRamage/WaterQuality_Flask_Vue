@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="camera-popup">
         <b-card class="wq-card"
                 header="Camera Site"
                 header-tag="header">
@@ -10,13 +10,6 @@
             </b-card-sub-title>
             <b-card-text class="mt-3">
                 <p>
-                    <span class="font-avenir">
-                        <b>Rip Current Prediction: {{getAdvisory}}</b>
-                    </span>
-                    <br>
-                    <span class="ml-2 avenir-font-light">Date: {{advisoryDate}}</span>
-                    <br>
-                    <b v-if="isDataFresh == false" class="ml-4 avenir-font-light">DATA IS OUT OF DATE</b>
                 </p>
             </b-card-text>
 
@@ -37,7 +30,7 @@
     let low_marker = require('@/assets/images/low_marker_25x25.png');
     let high_marker = require('@/assets/images/high_marker_25x25.png');
     export default {
-        name: 'RipcurrentPopup',
+        name: 'CameraPopup',
         props: ['feature'],
         data() {
             return {
@@ -113,6 +106,14 @@
     .avenir-font-light {
         font-family: 'Avenir';
         font-weight: lighter;
+    }
+    #camera-popup div .card-title
+    {
+        font-size: 1.0rem
+    }
+    #camera-popup div .card-subtitle
+    {
+        font-size: 1.0rem
     }
 
 

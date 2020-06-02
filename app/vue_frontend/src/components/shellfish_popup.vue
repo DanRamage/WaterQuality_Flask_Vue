@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="shellfish-popup">
         <b-card class="wq-card"
                 header="Shellfish Harvest Site"
                 header-tag="header">
@@ -7,7 +7,7 @@
                 <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
                 Site: {{stationName}}
             </b-card-title>
-            <b-card-sub-title>
+            <b-card-sub-title class="avenir-font-light">
                 Region: {{regionName}}
             </b-card-sub-title>
             <b-card-text class="mt-3">
@@ -20,10 +20,9 @@
                             <b>Site: OPEN</b>
                         </div>
                     </span>
-                    <br>
                     <span class="ml-2 avenir-font-light">Last Data Check: {{lastCheckedDate}}</span>
                     <br>
-                    <b v-if="isDataFresh == false" class="avenir-font-light text-danger">DATA IS OUT OF DATE</b>
+                    <b v-if="isDataFresh == false" class="ml-2 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
 
                 </p>
             </b-card-text>
@@ -130,6 +129,14 @@
     .avenir-font-light {
         font-family: 'Avenir';
         font-weight: lighter;
+    }
+    #shellfish-popup div .card-title
+    {
+        font-size: 1.0rem
+    }
+    #shellfish-popup div .card-subtitle
+    {
+        font-size: 1.0rem
     }
 
 
