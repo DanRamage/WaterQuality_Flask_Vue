@@ -121,18 +121,21 @@ def build_url_rules(app):
     FollyBeachAboutPage, \
     FollyBeachCameraPage, \
     CameraDataAPI, \
-    SiteDataAPI, \
     SiteMapPage, \
-    SitesDataAPI
+    SitesDataAPI, \
+    SiteBacteriaDataAPI
 
   #Page rules
   app.add_url_rule('/', view_func=ShowIntroPage.as_view('htb_intro'))
   #app.add_url_rule('/about', view_func=ShowAboutPage.as_view('about_page'))
   #SC sites
+  '''
   app.add_url_rule('/myrtlebeach', view_func=SiteMapPage.as_view('myrtlebeach'))
   app.add_url_rule('/charleston', view_func=SiteMapPage.as_view('charleston'))
   app.add_url_rule('/follybeach', view_func=SiteMapPage.as_view('follybeach'))
-
+  '''
+  #old route handling
+  '''
   #app.add_url_rule('/myrtlebeach', view_func=MyrtleBeachPage.as_view('myrtlebeach'))
   #app.add_url_rule('/myrtlebeach/about', view_func=MBAboutPage.as_view('mb_about'))
   #app.add_url_rule('/charleston', view_func=CharlestonPage.as_view('charleston'))
@@ -152,15 +155,19 @@ def build_url_rules(app):
   app.add_url_rule('/killdevilhills', view_func=SiteMapPage.as_view('killdevilhills'))
   #app.add_url_rule('/killdevilhills', view_func=KillDevilHillsPage.as_view('killdevilhills'))
   #app.add_url_rule('/killdevilhills/about', view_func=KDHAboutPage.as_view('kdh_about'))
+  '''
 
   #REST rules
-  app.add_url_rule('/api/<string:sitename>/sites', view_func=SitesDataAPI.as_view('site_data_view'), methods=['GET'])
+  app.add_url_rule('/api/v1/<string:sitename>/sites', view_func=SitesDataAPI.as_view('site_data_view'), methods=['GET'])
+  app.add_url_rule('/api/v1/<string:sitename>/<string:site>/bacteria', view_func=SiteBacteriaDataAPI.as_view('site_bacteria_data'), methods=['GET'])
 
+  #old rest routes
+  '''
   app.add_url_rule('/predictions/current_results/<string:sitename>', view_func=PredictionsAPI.as_view('predictions_view'), methods=['GET'])
   app.add_url_rule('/sample_data/current_results/<string:sitename>', view_func=BacteriaDataAPI.as_view('sample_data_view'), methods=['GET'])
   app.add_url_rule('/station_data/<string:sitename>/<string:station_name>', view_func=StationDataAPI.as_view('station_data_view'), methods=['GET','POST'])
   #app.add_url_rule('/station_data/<string:sitename>/<string:station_name>', view_func=StationDataAPI.as_view('station_data_update'), methods=['POST'])
-
+  '''
   @app.before_request
   def check_for_maintenance():
     if IS_MAINTENANCE_MODE and request.path != url_for('maintenance'):

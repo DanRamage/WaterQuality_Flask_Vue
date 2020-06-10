@@ -18,6 +18,7 @@
     "moment": "^2.24.0",
     "typeface-montserrat": "0.0.75",
     "vue": "^2.6.11",
+    "vue-router": "^3.3.2",
     "vue2-leaflet": "^2.5.2",
     "vuelayers": "^0.11.22",
     "vuex": "^3.1.3"

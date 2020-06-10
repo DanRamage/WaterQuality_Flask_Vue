@@ -2,7 +2,7 @@ module.exports = {
     //indexPath: process.env.NODE_ENV === 'production' ? '../../wq_flask/app/static/intro_page.html' : '/dist/index.html',
     //publicPath: process.env.NODE_ENV === 'production' ? '../../wq_flask/app/static' : '/dist/static',
     //assetsDir: process.env.NODE_ENV === 'production' ? 'vue' : '',
-
+    /*
     pages: {
         intropage: {
             // entry for the page
@@ -19,6 +19,6 @@ module.exports = {
             filename: 'map_page.html'
         }
     },
-
+    */
     chainWebpack: config => config.optimization.minimize(false)
 };

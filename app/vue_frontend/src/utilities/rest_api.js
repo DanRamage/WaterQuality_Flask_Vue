@@ -1,31 +1,18 @@
 import axios from "axios";
 
-//let BASE_API_URL = 'http://howsthebeach.org/api/';
-let BASE_API_URL = 'http://127.0.0.1:5000/api/';
-
+//let BASE_API_URL = 'http://howsthebeach.org/api/v1/';
+let BASE_API_URL = 'http://127.0.0.1:5000/api/v1/';
+//let BASE_API_URL = 'https://dev.howsthebeach.org/api/v1/';
 export default {
-    GetSiteData(site_name, startdate) {
-        console.log("GetSiteData started for site" + site_name);
+    GetSiteData(site_name, site, startdate, enddate) {
+        console.log("GetSiteData started for site " + site_name + ' station '  +  site);
 
-        let site_data = [];
-        let url = BASE_API_URL + site_name +
-             '?startdate=' + startdate;
-        axios.get(url)
-            .then(function (response) {
-                console.log(response.data);
-                if (response.status == 200) {
-                    response;
-                }
-                else {
-                    console.log("GetSiteData error response, status code: " + response.status);
-                }
-            })
-            .catch(function (error) {
-                console.log("GetSiteData error response, error: " + error);
-            });
+        let url = BASE_API_URL + site_name + '/' + site + '/bacteria' +
+             '?startdate=' + startdate +
+             '&enddate=' + enddate;
+        console.log("GetSiteData POST url:" + url);
+        return(axios.get(url));
 
-        console.log("GetSiteData finished for site" + site_name + " startdate: " + startdate);
-        return site_data;
     },
     GetSitesPromise(site_name) {
         console.log("GetSites started for site " + site_name);

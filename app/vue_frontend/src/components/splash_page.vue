@@ -24,27 +24,27 @@
 
           <b-collapse id="nav-collapse" is-nav>
             <b-navbar-nav class="navbar-center">
-              <b-nav-item href="/killdevilhills">
+              <b-nav-item to="/killdevilhills/map" exact exact-active-class="active">
                 <div class="text-white text-center" @mouseover="site_btn_hover($event, 0)">
                   <span class="montserat-font">OUTER BANKS</span><br><span class="avenir-font-oblique">North Carolina</span>
                 </div>
               </b-nav-item>
-              <b-nav-item href="/myrtlebeach">
+              <b-nav-item to="/myrtlebeach/map" exact exact-active-class="active">
                 <div class="text-white text-center" @mouseover="site_btn_hover($event, 1)">
                   <span class="montserat-font">MYRTLE BEACH</span><br><span class="avenir-font-oblique">South Carolina</span>
                 </div>
               </b-nav-item>
-              <b-nav-item href="/charleston">
+              <b-nav-item to="/charleston/map" exact exact-active-class="active">
                 <div class="text-white text-center" @mouseover="site_btn_hover($event, 2)">
                   <span class="montserat-font">CHARLESTON HARBOR</span><br><span class="avenir-font-oblique">South Carolina</span>
                 </div>
               </b-nav-item>
-              <b-nav-item href="/follybeach">
+              <b-nav-item to="/follybeach/map" exact exact-active-class="active">
                 <div class="text-white text-center" @mouseover="site_btn_hover($event, 3)">
                   <span class="montserat-font">FOLLY BEACH</span><br><span class="avenir-font-oblique">South Carolina</span>
                 </div>
               </b-nav-item>
-              <b-nav-item href="/sarasota">
+              <b-nav-item to="/sarasota/map" exact exact-active-class="active">
                 <div class="text-white text-center" @mouseover="site_btn_hover($event, 4)">
                   <span class="montserat-font">SARASOTA</span><br><span class="avenir-font-oblique">Florida</span>
                 </div>
@@ -148,18 +148,32 @@
           </b-col>
         </b-row>
       </footer>
+
     </b-container>
 </template>
 
 <script>
+  import Vue from 'vue'
+
+  import { CarouselPlugin,LayoutPlugin,NavbarPlugin,NavPlugin } from 'bootstrap-vue';
+  Vue.use(CarouselPlugin);
+  Vue.use(LayoutPlugin);
+  Vue.use(NavbarPlugin);
+  Vue.use(NavPlugin);
+
+
 
 export default {
+
   data: function () {
     return {
     }
   },
   name: 'SplashPage',
   methods: {
+    loadHome: function(){
+      this.$router.push('/')
+    },
     site_click (event, site) {
       console.log('Site: ' + site + ' clicked')
     },
@@ -170,6 +184,9 @@ export default {
       console.log('Site: ' + SlideIndex + ' hover')
       this.$refs.HTBCarousel.setSlide(SlideIndex)
     }
+  },
+  mounted: function() {
+    this.loadHome()
   }
 }
 
@@ -201,19 +218,6 @@ export default {
   }
   .background_color {
     background-color: rgba(0, 61, 126, .85);
-  }
-  .montserat-font {
-    font-family: 'Montserrat';
-
-  }
-  .avenir-font-oblique {
-    font-family: 'Avenir';
-    font-style: oblique;
-  }
-
-  .avenir-font-light {
-    font-family: 'Avenir';
-    font-weight: lighter;
   }
   .swimmer-icon {
     width: 50px;

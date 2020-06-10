@@ -64,6 +64,9 @@
                         <div v-else-if='feature.properties.site_type == "Rip Current"'>
                             <RipcurrentPopup :feature="feature"></RipcurrentPopup>
                         </div>
+                        <div v-else-if='feature.properties.site_type == "Camera Site"'>
+                            <CameraPopup :feature="feature"></CameraPopup>
+                        </div>
                         <div v-else>
                             <p>{{feature.id}}</p>
                         </div>
@@ -87,9 +90,43 @@
 </template>
 
 <script>
+    import Vue from 'vue'
+    import 'bootstrap/dist/css/bootstrap.min.css'
+    import 'bootstrap-vue/dist/bootstrap-vue.css'
+    import 'typeface-montserrat/index.css'
+
+    import { Map, TileLayer, OsmSource, Geoloc, VectorLayer, VectorSource, XyzSource, StyleBox, CircleStyle, FillStyle,
+        StrokeStyle, Overlay, SelectInteraction, StyleFunc } from 'vuelayers'
+    Vue.use(Map);
+    Vue.use(TileLayer);
+    Vue.use(OsmSource);
+    Vue.use(Geoloc);
+    Vue.use(VectorLayer);
+    Vue.use(VectorSource);
+    Vue.use(XyzSource);
+    Vue.use(StyleBox);
+    Vue.use(FillStyle);
+    Vue.use(StrokeStyle);
+    Vue.use(CircleStyle);
+    Vue.use(Overlay);
+    Vue.use(SelectInteraction);
+    Vue.use(StyleFunc);
+
+
+    import 'vuelayers/lib/style.css' // needs css-loader
+
+    import { SidebarPlugin, ButtonPlugin, ButtonGroupPlugin, LayoutPlugin } from 'bootstrap-vue';
+    Vue.use(ButtonPlugin);
+    Vue.use(ButtonGroupPlugin);
+    Vue.use(LayoutPlugin);
+    Vue.use(SidebarPlugin);
+
     import DataAPI from "../utilities/rest_api";
     import FeatureUtils from "../utilities/feature_funcs";
     import WQPopup from "./wq_popup.vue";
+    import ShellfishPopup from "@/components/shellfish_popup";
+    import RipcurrentPopup from "@/components/riptide_popup";
+    import CameraPopup from "@/components/camera_popup";
     import {findPointOnSurface} from 'vuelayers/lib/ol-ext'
     //import moment from 'moment';
 
@@ -101,13 +138,12 @@
     import LowMarkerIcon from '@/assets/images/low_marker_25x25.png'
     import HiMarkerIcon from '@/assets/images/high_marker_25x25.png'
     import NoneMarkerIcon from '@/assets/images/none_marker_25x25.png'
-    import ShellfishPopup from "@/components/shellfish_popup";
-    import RipcurrentPopup from "@/components/riptide_popup";
 
     export default {
         name: 'OLMapPage',
 
         components: {
+            CameraPopup,
             RipcurrentPopup,
             ShellfishPopup,
             'WQPopup': WQPopup
@@ -126,7 +162,7 @@
                 advisory_limits: undefined,
                 nowcastActive: false,
                 advisoryActive: true,
-                sidebarActive: true
+                sidebarActive: false
                 //sitesLayerExtents: createEmpty()
             }
         },
@@ -137,7 +173,9 @@
             if (path.length) {
                 let sitename = path.split('/');
                 this.site_name = sitename[1];
-
+                //Put the site name in the store so other components have easy access and we don't have to pass it
+                //in everywhere.
+                this.$store.commit('updateSiteName', this.site_name);
                 console.debug("Retrieving initial site: " +  this.site_name + " data.")
                 DataAPI.GetSitesPromise(this.site_name, '').then(features => {
                     console.debug("Retrieved: " + features.data.sites.features.length + " features");
@@ -301,20 +339,7 @@
             sidebarButtonClick() {
                 this.sidebarActive = !this.sidebarActive;
                 console.debug("sidebarButtonClick clicked: " + this.sidebarActive);
-            }
-            /*
-            onSourceChanged () {
-                // sourceVm - vl-source-vector instance
-                // sourceVm.$source - ol/source/Vector instance
-                if(this.$refs.site_vector_layer.$source.getState() === 'ready') {
-                    this.$refs.site_map.$map.updateSize();
-                    let extents = this.$refs.site_vector_layer.$source.getExtent();
-                    console.debug("Extents: " + extents);
-                    let m_size = this.$refs.site_map.$map.getSize();
-                    this.$refs.site_map.getView().fit(extents, m_size);
-                }
             },
-            */
         },
         watch: {
             /*
@@ -384,6 +409,7 @@
     */
 </style>
 <style scoped>
+
     .wrapper {
         display: flex;
         width: 100%;
@@ -481,10 +507,6 @@
         transition: all 0.3s;
     }
 
-    .montserat-font {
-        font-family: 'Montserrat';
-
-    }
     .sidebar-opacity {
         opacity: 0.9;
     }

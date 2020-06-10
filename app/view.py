@@ -15,7 +15,7 @@ from datetime import datetime
 from collections import OrderedDict
 from wtforms import form, fields, validators
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from sqlalchemy import exc
 from shapely.wkb import loads as wkb_loads
 from shapely.wkt import loads as wkt_loads
 from config import CURRENT_SITE_LIST, VALID_UPDATE_ADDRESSES, SITES_CONFIG, SITE_TYPE_DATA_VALID_TIMEOUTS
@@ -159,7 +159,8 @@ class MaintenanceMode(View):
 class ShowIntroPage(View):
   def dispatch_request(self):
     current_app.logger.debug('IP: %s intro_page rendered' % (request.remote_addr))
-    return render_template("intro_page.html")
+    #return render_template("intro_page.html")
+    return render_template("index.html")
 
 class ShowAboutPage(View):
   def __init__(self, site_name="./", page_template='about_page.html'):
@@ -1252,6 +1253,16 @@ class SitesDataAPI(MethodView):
       current_app.logger.exception(e)
     return None
 
+  def create_camera_properties(self, site_rec):
+    try:
+        properties = {
+          'station': site_rec.site_name
+        }
+        return properties
+    except Exception as e:
+      current_app.logger.exception(e)
+    return None
+
   def create_rip_current_properties(self, ripcurrents_data, site_rec, data_timeout):
     try:
       features = ripcurrents_data['features']
@@ -1313,7 +1324,8 @@ class SitesDataAPI(MethodView):
           site_type = 'Default'
         #All sites will have some base properties.
         properties = {'description': site_rec.description,
-                      'site_type': site_type
+                      'site_type': site_type,
+                      'site_name': site_rec.site_name
                       }
         #Default sites are water quality sites, so we will check the predicition and advisory data and add to our response.
         if site_type == 'Default':
@@ -1359,6 +1371,10 @@ class SitesDataAPI(MethodView):
           property = self.create_rip_current_properties(ripcurrents_data, site_rec, data_timeout)
           if property is not None:
             properties[site_type] = property
+        elif site_type == 'Camera Site':
+          property = self.create_camera_properties(site_rec)
+          if property is not None:
+            properties[site_type] = property
 
         feature = geojson.Feature(id=site_rec.site_name,
                                   geometry=geojson.Point((site_rec.longitude,site_rec.latitude)),
@@ -1375,139 +1391,119 @@ class SitesDataAPI(MethodView):
 
     return (client_results, ret_code, {'Content-Type': 'Application-JSON'})
 
-class SiteDataAPI(MethodView):
-
-  def get_site_message(self, sitename):
-    current_app.logger.debug('IP: %s get_site_message started' % (request.remote_addr))
+class SiteBacteriaDataAPI(MethodView):
+  def get_requested_station_data(self, station, start_date_obj, end_date_obj, station_directory):
     start_time = time.time()
+    current_app.logger.debug("get_requested_station_data Station: %s Start Date: %s End Date: %s"\
+                             % (station, start_date_obj, end_date_obj))
+
+    results = []
     try:
-      rec = db.session.query(Site_Message)\
-        .join(Project_Area, Project_Area.id == Site_Message.site_id)\
-        .filter(Project_Area.area_name == sitename).first()
-    except Exception as e:
+      filepath = os.path.join(station_directory, '%s.json' % (station))
+      current_app.logger.debug("Opening station file: %s" % (filepath))
+
+      with open(filepath, "r") as json_data_file:
+        stationJson = geojson.load(json_data_file)
+
+        advisoryList = stationJson['properties']['test']['beachadvisories']
+        for ndx in range(len(advisoryList)):
+          #Handle a bunch of different possibilites for the date format. In the future
+          #hopefully we move to a standard.
+          try:
+            tst_date_obj = datetime.strptime(advisoryList[ndx]['date'], "%Y-%m-%d")
+          except ValueError as e:
+            try:
+              tst_date_obj = datetime.strptime(advisoryList[ndx]['date'], "%Y-%m-%d %H:%M:%S")
+            except ValueError as e:
+              try:
+                tst_date_obj = datetime.strptime(advisoryList[ndx]['date'], "%Y-%m-%dT%H:%M:%SZ")
+              except ValueError as e:
+                current_app.logger.exception(e)
+                tst_date_obj = None
+
+          if tst_date_obj is not None and (tst_date_obj >= start_date_obj and tst_date_obj < end_date_obj):
+            result = advisoryList[ndx]
+            value = result['value']
+            try:
+              value = float(value)
+            except ValueError as e:
+              value = 10
+            results.append({'date': tst_date_obj.strftime('%Y-%m-%d %H:%M:%S'),
+                            'value': value})
+
+      return results
+    except (IOError, ValueError, Exception) as e:
       current_app.logger.exception(e)
-    current_app.logger.debug('get_site_message finished in %f seconds' % (time.time()-start_time))
-    return rec
 
-  def get_program_info(self, sitename):
-    current_app.logger.debug('get_program_info started')
+    return None
+  def get(self, sitename=None, site=None):
     start_time = time.time()
-    program_info = {}
-    try:
-      #Get the advisroy limits
-      limit_recs = db.session.query(Advisory_Limits)\
-        .join(Project_Area, Project_Area.id == Advisory_Limits.site_id)\
-        .filter(Project_Area.area_name == sitename)\
-        .order_by(Advisory_Limits.min_limit).all()
-      limits = {}
-      for limit in limit_recs:
-        limits[limit.limit_type] = {
-          'min_limit': limit.min_limit,
-          'max_limit': limit.max_limit,
-          'icon': limit.icon
-        }
-      program_info = {
-          'advisory_limits': limits,
-        }
-    except Exception as e:
-      current_app.logger.exception(e)
-    current_app.logger.debug('get_program_info finished in %f seconds' % (time.time()-start_time))
-    return program_info
+    current_app.logger.debug('IP: %s SiteBacteriaDataAPI get for %s site: %s' % (request.remote_addr, sitename, site))
+    ret_code = 404
+    results = {}
 
-  def get_data(self, sitename):
-    current_app.logger.debug('get_data started')
-    start_time = time.time()
-    data = {}
-    try:
-      if sitename in SITES_CONFIG:
-        prediction_data, pred_ret_code = get_data_file(SITES_CONFIG[sitename]['prediction_file'])
-        advisory_data, adv_ret_code = get_data_file(SITES_CONFIG[sitename]['advisory_file'])
-        data = {
-          'prediction_data': json.loads(prediction_data),
-          'advisory_data': json.loads(advisory_data)
-        }
-        #Query the Sample_Site table to get any specific settings we need for the map.
-        #Currently for the Charleston site, we want to disable the Advisory in the site popup
-        #since they do not issue advisories.
-        sample_sites = db.session.query(Sample_Site) \
-          .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
-          .filter(Project_Area.area_name == sitename).all()
-
-        build_advisory_from_db = False
-        if adv_ret_code == 404:
-          del(data['advisory_data']['contents'])
-          data['advisory_data']['type'] = "FeatureCollection"
-          data['advisory_data']['features'] = []
-          data['advisory_data']['status']['http_code'] = 200
-          build_advisory_from_db = True
-
-        build_blank_predictions = False
-        if pred_ret_code == 404:
-          data['prediction_data']['contents'] = {
-            'run_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'testDate': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'stationData': {'features': []}
-          }
-          data['prediction_data']['status']['http_code'] = 200
-          build_blank_predictions = True
-
-        for site in sample_sites:
-          if not build_advisory_from_db:
-            advisory_data = data['advisory_data']['features']
-            for site_data in advisory_data:
-              if site_data['properties']['station'] == site.site_name:
-                site_data['properties']['issues_advisories'] = site.issues_advisories
-          else:
-            feature = build_advisory_feature(site, datetime.now(), [])
-            feature['issues_advisories'] = site.issues_advisories
-            data['advisory_data']['features'].append(feature)
-          if build_blank_predictions:
-            feature = build_prediction_feature(site, datetime.now(), [])
-            data['prediction_data']['contents']['stationData']['features'].append(feature)
-
-        #Query the database to see if we have any temporary popup sites.
-        popup_sites = db.session.query(Sample_Site) \
-          .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
-          .filter(Project_Area.area_name == sitename)\
-          .filter(Sample_Site.temporary_site == True).all()
-        if len(popup_sites):
-          advisory_data_features = data['advisory_data']['features']
-          for site in popup_sites:
-            sample_date = site.row_entry_date
-            sample_value = []
-            if len(site.site_data):
-              sample_date = site.site_data[0].sample_date
-              sample_value.append(site.site_data[0].sample_value)
-            feature = build_advisory_feature(site, sample_date, sample_value)
-            advisory_data_features.append(feature)
-      else:
-        current_app.logger.error("Site: %s does not exist" % (sitename))
-    except Exception as e:
-      current_app.logger.exception(e)
-    current_app.logger.debug('get_data finished in %f seconds' % (time.time()-start_time))
-    return data
-
-  def get(self, sitename=None):
-    start_time = time.time()
-    current_app.logger.debug('IP: %s SiteDataAPI get for site: %s' % (request.remote_addr, sitename))
-    ret_code = 501
-    results = None
 
     if sitename in SITES_CONFIG:
-      ret_code = 200
-      site_message = self.get_site_message(sitename)
-      program_info = self.get_program_info(sitename)
-      data = self.get_data(sitename)
-      results = {
-        'site_message': {'message' : site_message.message, 'level': site_message.site_message_level},
-        'program_info': program_info,
-        'data': data
-      }
+      start_date_obj = None
+      end_date_obj = None
+      if 'startdate' in request.args:
+        start_date = request.args['startdate']
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+      else:
+        current_app.logger.error('IP: %s SiteBacteriaDataAPI ERROR get for %s site: %s startdate not supplied' % (request.remote_addr, sitename, site))
+        results = build_json_error(404, "startdate parameter must be included in POST.")
+      if 'enddate' in request.args:
+        end_date = request.args['enddate']
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+      else:
+        current_app.logger.error('IP: %s SiteBacteriaDataAPI ERROR get for %s site: %s enddate not supplied' % (request.remote_addr, sitename, site))
+        results = build_json_error(404, "enddate parameter must be included in POST.")
+      if start_date_obj is not None and end_date_obj is not None:
+        try:
+          site_rec = db.session.query(Sample_Site) \
+            .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
+            .join(Site_Type, Site_Type.id == Sample_Site.site_type_id) \
+            .filter(Sample_Site.site_name == site)\
+            .filter(Project_Area.area_name == sitename).one()
+        except exc.SQLAlchemyError as e:
+          ret_code = 404
+          results = build_json_error(404, 'Site: %s does not exist.' % (site))
+        except Exception as e:
+          current_app.logger.exception(e)
+          ret_code = 501
+          results = build_json_error(501, 'Server encountered a problem with the query.' % (site))
+        else:
+          if site_rec.site_type.name is not None:
+            site_type = site_rec.site_type.name
+          else:
+            site_type = 'Default'
+          # All sites will have some base properties.
+          properties = {'description': site_rec.description,
+                        'site_type': site_type,
+                        'site_name': site_rec.site_name
+                        }
+
+          ret_code = 200
+
+          site_data = self.get_requested_station_data(site,
+                                                      start_date_obj,
+                                                      end_date_obj,
+                                                      SITES_CONFIG[sitename]['stations_directory'])
+          properties[site_type] = {'advisory': {'results': []}}
+          if site_data is not None:
+            properties[site_type]['advisory']['results'] = site_data
+          results = geojson.Feature(id=site_rec.site_name,
+                                    geometry=geojson.Point((site_rec.longitude, site_rec.latitude)),
+                                    properties=properties)
+
     else:
-      results = json.dumps({'status': {'http_code': ret_code},
-                                  'contents': None
-                                  })
+      results = build_json_error(404, 'Site: %s not found' % (sitename))
 
-    current_app.logger.debug('SiteDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
-
+    current_app.logger.debug('BacteriaDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
     return (results, ret_code, {'Content-Type': 'Application-JSON'})
+
+
+def build_json_error(error_code, error_message):
+  json_error = {}
+  json_error['error'] = {'message': error_message}
+  return json_error

@@ -1,82 +1,375 @@
 <template>
-    <div>
-        <b-card class="wq-card"
-                header="Water Quality Site"
-                header-tag="header">
-            <!--<b-card-body>-->
-            <div v-if="hasAdvisoryData">
-                <b-card-title class="font-avenir">
-                    <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
-                     Site: {{feature.properties.description}}
-                </b-card-title>
+    <div id="wq-popup">
+        <div id="wq_card"
+             class="card wq-card"
+        >
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           data-toggle="tab"
+                           v-on:click='tabClicked("data_tab")'
+                           v-bind:class="[wq_info_active ? 'active': '']">
+                            Water Quality Site
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab"
+                           v-on:click='tabClicked("graph_tab")'
+                           v-bind:class="[graph_active ? 'active': '']">
+                            Data
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <div v-else>
-                <b-card-title class="font-avenir">Site: {{feature.properties.description}}</b-card-title>
-            </div>
-            <b-card-sub-title class="avenir-font-light">ID: {{feature.id}}</b-card-sub-title>
+            <div class="tab-content card-body">
+                <div id="advisory-data"
+                     class="tab-pane"
+                     ref="advisory_data"
+                     v-bind:class="[wq_info_active ? 'active show' : '']"
+                >
+                    <div v-if="hasAdvisoryData">
+                        <div class="card-title font-avenir">
+                            <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
+                            Site: {{feature.properties.description}}
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div class="card-title font-avenir">Site: {{feature.properties.description}}</div>
+                    </div>
+                    <div  class="card-subtitle avenir-font-light">ID: {{feature.id}}</div>
+                    <div class="tab-content" id="tab_content">
+                        <div v-if="hasAdvisoryData">
+                            <div class="card-text mt-3">
+                                <p>
+                            <span class="font-avenir">
+                                <b>Bacteria Data: {{advisoryValue}}</b>
+                            </span>
+                                    <br>
+                                    <span class="ml-4 avenir-font-light">Date: {{advisoryDate}}</span>
+                                    <br>
+                                    <b v-if='isDataFresh("advisory") == false' class="ml-4 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
+                                </p>
+                            </div>
+                        </div>
+                        <div v-if="hasNowcastData">
+                            <div class="card-text mt-3">
+                                <p>
+                                    <span class="font-avenir"><b>Nowcast: {{nowcastsValue}}</b></span>
+                                    <br>
+                                    <span class="ml-4 avenir-font-light">Date: {{nowcastsDate}}</span>
+                                    <br>
+                                    <b v-if='isDataFresh("nowcasts") == false' class="ml-4 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="advisory-graph"
+                     class="tab-pane"
+                     ref="advisory_graph"
+                     :class="[graph_active ? 'active show' : '']">
+                    <!--
+                     :class="[graph_active ? 'active show' : '', graphOpen ? 'graph-fullscreen' : 'graph-normal' ]"
+                     :style="{width: graphOpen ? tabFullScreenWidth : '',
+                                height: graphOpen ? tabFullScreenHeight : ''}"
+                    -->
+                    <div v-if="hasAdvisoryData">
+                        <div class="card-title font-avenir">
+                            <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
+                            Site: {{feature.properties.description}}
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div class="card-title font-avenir">Site: {{feature.properties.description}}</div>
+                    </div>
+                    <div  class="card-subtitle avenir-font-light">ID: {{feature.id}}</div>
+                    <div clas="card-text text-center">
+                        Bacteria per 100 mL
+                        <!--
+                        <router-link
+                                :to="{name: 'StationGraph'}"
+                                tag="button">
+                            Open Graph
+                        </router-link>
+                        -->
 
-            <div v-if="hasAdvisoryData">
-                <b-card-text class="mt-3">
-                    <p>
-                        <span class="font-avenir">
-                            <b>Bacteria Data: {{advisoryValue}}</b>
-                        </span>
-                        <br>
-                        <span class="ml-4 avenir-font-light">Date: {{advisoryDate}}</span>
-                    </p>
-                </b-card-text>
-            </div>
-            <div v-if="hasNowcastData">
-                <b-card-text class="mt-3">
-                    <p>
-                        <span class="font-avenir"><b>Nowcast: {{nowcastsValue}}</b></span>
-                        <br>
-                        <span class="ml-4 avenir-font-light">Date: {{nowcastsDate}}</span>
-                    </p>
-                </b-card-text>
-            </div>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="openGraph()">
 
-            <!--</b-card-body>-->
-        </b-card>
+                                <!--
+                                v-on:click='openGraph()'
+                               -->
+                            Open Graph
+                        </button>
+                        <div v-if="graphOpen">
+                            <ModalGraph :feature="feature"
+                                        :graph_data="graph_data"
+                                        @modal_graph_closed="graphOpen=false">
+                            </ModalGraph>
+                        </div>
+                    </div>
+                    <div
+                         ref="graph_column"
+                         :height="graph_height + 'px'"
+                         :width="graph_width + 'px'"
+                         >
+
+                            <WQPlot :chart_options="chart_options"
+                                    :id="feature.id+'_chart_div'"
+                                    :station_data="graph_data"
+                                    :height="graph_height"
+                                    :width="graph_width">
+                            </WQPlot>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    import Vue from 'vue';
     import moment from 'moment';
-    import { LayoutPlugin, CardPlugin } from 'bootstrap-vue';
+    import FeatureUtils from "../utilities/feature_funcs";
+    import WQPlot from "@/components/scatter_plot";
+    import ModalGraph from "@/components/modal_graph"
+    import DataAPI from "../utilities/rest_api";
+    import Highcharts from 'highcharts';
+
+    /*
+    import { LayoutPlugin, CardPlugin, NavPlugin, TabsPlugin } from 'bootstrap-vue';
     Vue.use(LayoutPlugin);
     Vue.use(CardPlugin);
-
+    Vue.use(NavPlugin);
+    Vue.use(TabsPlugin);
+    */
     let none_marker = require('@/assets/images/none_marker_25x25.png');
     let low_marker = require('@/assets/images/low_marker_25x25.png');
     let high_marker = require('@/assets/images/high_marker_25x25.png');
     export default {
         name: 'WQPopup',
         props: ['feature'],
+        components: {
+            WQPlot,ModalGraph
+        },
         data() {
             return {
+                wq_info_active: true,
+                graph_active: false,
+                feature_data: undefined,
+                init_graph_height: 250,
+                init_graph_width: 250,
+                graph_width: 250,
+                graph_height: 250,
+
+                graphOpen: false,
+                tabNormalWidth: '100%',
+                tabNormalHeight: '100%',
+                tabFullScreenWidth: '100%',
+                tabFullScreenHeight: '100%',
+                graphInitialPosition: undefined,
+                graph_data: [],
+                chart_options:
+                    {
+                        chart: {
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            defaultSeriesType: 'scatter',
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        title: {
+                            text: null
+                        },
+                        colors: ['#333333'],
+                        xAxis: {
+                            min: moment.utc().subtract(365, "days"),
+                            type: 'datetime',
+                            labels: {
+                                enabled: false,
+                            },
+                            endOnTick: true,
+                            showLastLabel: false,
+                            title: {
+                                text: '',
+                            },
+                            tickWidth: 0
+                        },
+                        yAxis: {
+                            type: 'logarithmic',
+                            showFirstLabel: false,
+                            labels: {
+                                enabled: false,
+                            },
+                            gridLineWidth: 0,
+                            lineWidth: 1,
+
+                            title: {
+                                text: '',
+                            },
+                            max: 10000,
+                            plotBands: [
+                                {
+                                    color: '#96ca2d',
+                                    from: this.$store.state.advisory_limits.low.minimum,
+                                    to: this.$store.state.advisory_limits.hi.minimum
+                                },
+                                {
+                                    color: '#DB1A0F',
+                                    from: this.$store.state.advisory_limits.hi.minimum,
+                                    to: 10000
+                                }
+                            ]
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return '<strong>Date:</strong> ' + Highcharts.dateFormat('%e %B %Y', this.x) + '<br /><strong>Bacteria level:</strong> ' + Math.round(this.y);
+                            }
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        series: [{
+                            name: 'Station',
+                            data: []
+                        }]
+
+                    }
+
+
             }
+        },
+        mounted() {
+            this.graphInitialPosition = this.$parent.$el.getBoundingClientRect();
         },
         methods: {
             getAdvisoryImage() {
                 let img_src = none_marker;
-                if(this.hasAdvisoryData) {
-                    let hi_limit = this.$store.state.advisory_limits.hi;
-                    let lo_limit = this.$store.state.advisory_limits.low;
-                    let value = this.advisoryValue;
-                    if (value >= hi_limit.minimum) {
-                        img_src = high_marker;
-                    }
-                    else if (value < lo_limit.maximum) {
-                        img_src = low_marker;
+                //If the data is too old, we use the none marker.
+                let properties = this.feature.properties;
+                let site_type = this.feature.properties.site_type;
+                let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
+                if(dataFresh) {
+                    if (this.hasAdvisoryData) {
+                        let hi_limit = this.$store.state.advisory_limits.hi;
+                        let lo_limit = this.$store.state.advisory_limits.low;
+                        let value = this.advisoryValue;
+                        if (value >= hi_limit.minimum) {
+                            img_src = high_marker;
+                        } else if (value < lo_limit.maximum) {
+                            img_src = low_marker;
+                        }
                     }
                 }
                 return img_src;
             },
+            isDataFresh: function(data_type) {
+                let properties = this.feature.properties;
+                let site_type = this.feature.properties.site_type;
+                if(data_type ==  'advisory') {
+                    return (FeatureUtils.isDataFresh(properties[site_type].advisory));
+                }
+                else if(data_type == 'nowcasts')
+                {
+                    return (FeatureUtils.isDataFresh(properties[site_type].nowcasts));
+                }
+            },
+            tabClicked: function(tab_name) {
+                console.debug(tab_name + ' clicked.');
+                if(tab_name == 'data_tab') {
+                    this.graph_active = false;
+                    this.wq_info_active = true;
+                }
+                else {
+                    let vm = this;
+                    this.wq_info_active = false;
+                    this.graph_active = true;
+                    this.$nextTick(function() {
+
+                        if(this.graph_data.length == 0) {
+                            //Get the size of the container
+                            this.graph_height = this.init_graph_height;
+                            this.graph_width = this.init_graph_width;
+                            //this.graph_height = vm.$refs["advisory_graph"].clientHeight;
+                            //this.graph_width = vm.$refs["advisory_graph"].clientWidth;
+                            console.log("Tab height: " + this.graph_height + " tab width: " + this.graph_width);
+
+                            let site_name = this.$store.state.site_name;
+                            //We pull the last 365 days worth of data to show.
+                            let start_date = moment().subtract(365, 'days').format("YYYY-MM-DD 00:00:00");
+                            let end_date = moment.utc().format("YYYY-MM-DD HH:mm:ss");
+                            DataAPI.GetSiteData(site_name, this.feature.properties.site_name, start_date, end_date)
+                                .then(response => {
+                                    vm.feature_data = response.data;
+                                    let site_type = vm.feature_data.properties.site_type;
+                                    if (site_type in vm.feature_data.properties) {
+                                        vm.feature_data.properties[site_type].advisory.results.forEach(function (rec) {
+                                            let date_val = moment(rec.date);
+                                            vm.graph_data.push([date_val.valueOf(), rec.value]);
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error(error));
+                        }
+                        //this.graph_data = this.build_test_graph_data();
+                    });
+                }
+            },
+            openGraph: function() {
+                console.log("expandGraphClick handled. Window height: " + window.innerHeight
+                    + " Window width: " + window.innerWidth
+                    + " graph column height: " + this.$refs.graph_column.clientHeight
+                    + " graph column width: " + this.$refs.graph_column.clientWidth
+                );
+                //We get the position of the popup if we don't already have it. When we expand the graph, we want to
+                //be able to collapse it back to original location.
+                //
+                /*
+                this.graphInitialPosition = this.$parent.$el.getBoundingClientRect();
+                if(this.graphOpen)
+                {
+                    this.tabFullScreenHeight = this.tabNormalHeight;
+                    this.tabFullScreenWidth = this.tabNormalWidth;
+                    this.graph_width = this.init_graph_width;
+                    this.graph_height = this.init_graph_height;
+
+                }
+                else {
+                    this.tabNormalHeight = this.$parent.$el.offsetHeight + "px";
+                    this.tabNormalWidth = this.$parent.$el.offsetWidth + "px";
+                    this.tabFullScreenHeight = window.innerHeight + "px";
+                    this.tabFullScreenWidth = window.innerWidth + "px";
+                    //this.$parent.$el.
+                    this.graph_width = window.innerWidth;
+                    this.graph_height = window.innerHeight;
+                }
+                */
+                this.graphOpen = !this.graphOpen;
+                //let graph_url = this.$route.path + '/bacteriagraph';
+                //this.$router.push(graph_url);
+
+            },
+            build_test_graph_data() {
+                let cnt = 0;
+                let now_date = moment();
+                let test_data = [];
+                test_data.push({date: now_date.valueOf(),
+                    value: 10});
+                let last_date = now_date;
+                while(cnt < 25) {
+                    last_date = last_date.subtract(1, 'weeks');
+                    let value = 10;
+                    if((cnt % 4) == 0)
+                        value = 300;
+                    test_data.push([last_date.valueOf(),value]);
+                    cnt += 1;
+                }
+                return(test_data);
+            }
+
         },
         computed: {
-
             hasAdvisoryData: function() {
                 console.debug("hasAdvisoryData started.");
                 let site_type = this.feature.properties.site_type;
@@ -145,23 +438,35 @@
                 console.debug("nowcastsValue returning: ");
                 return("");
             }
-
         },
     }
 </script>
 <style scoped>
+    #wq-popup div .card-title
+    {
+        font-size: 1.0rem
+    }
+    #wq-popup div .card-subtitle
+    {
+        font-size: 1.0rem
+    }
+
     .wq-card {
         /*font-family: 'Montserrat';*/
         color: rgba(0, 61, 126, .85);
         background-color: rgba(255, 255, 255, .85);
     }
-    .font-avenir {
-        font-family: 'Avenir';
+    .graph-normal {
+        position: relative;
+        background-color: rgba(255, 255, 255, .85);
     }
-    .avenir-font-light {
-        font-family: 'Avenir';
-        font-weight: lighter;
+    .graph-fullscreen {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 10000;
+        background-color: rgba(255, 255, 255, 1.0);
+        margin-left: 10px;
+        margin-top: 10px;
     }
-
-
 </style>

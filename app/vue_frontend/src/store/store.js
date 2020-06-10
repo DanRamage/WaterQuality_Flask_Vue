@@ -7,6 +7,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         advisory_limits: new AdvisoryLimits(),
+        site_name: '',
         sites: undefined,
         site_message: undefined
     },
@@ -19,6 +20,9 @@ export default new Vuex.Store({
         updateAdvisoryLimits(state, limits) {
             state.advisory_limits.update(limits);
         },
+        updateSiteName(state, site_name) {
+            state.site_name = site_name;
+        }
         /*
         updateSites(state, sites) {
 
