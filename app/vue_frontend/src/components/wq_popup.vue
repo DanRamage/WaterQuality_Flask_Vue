@@ -103,12 +103,14 @@
                                -->
                             Open Graph
                         </button>
+                        <!--
                         <div v-if="graphOpen">
                             <ModalGraph :feature="feature"
                                         :graph_data="graph_data"
                                         @modal_graph_closed="graphOpen=false">
                             </ModalGraph>
                         </div>
+                        -->
                     </div>
                     <div
                          ref="graph_column"
@@ -133,17 +135,11 @@
     import moment from 'moment';
     import FeatureUtils from "../utilities/feature_funcs";
     import WQPlot from "@/components/scatter_plot";
-    import ModalGraph from "@/components/modal_graph"
+    //import ModalGraph from "@/components/modal_graph"
+    //import StationGraph from "@/components/station_graph"
     import DataAPI from "../utilities/rest_api";
     import Highcharts from 'highcharts';
 
-    /*
-    import { LayoutPlugin, CardPlugin, NavPlugin, TabsPlugin } from 'bootstrap-vue';
-    Vue.use(LayoutPlugin);
-    Vue.use(CardPlugin);
-    Vue.use(NavPlugin);
-    Vue.use(TabsPlugin);
-    */
     let none_marker = require('@/assets/images/none_marker_25x25.png');
     let low_marker = require('@/assets/images/low_marker_25x25.png');
     let high_marker = require('@/assets/images/high_marker_25x25.png');
@@ -151,7 +147,9 @@
         name: 'WQPopup',
         props: ['feature'],
         components: {
-            WQPlot,ModalGraph
+            //ModalGraph,
+            //StationGraph,
+            WQPlot
         },
         data() {
             return {
@@ -347,7 +345,14 @@
                 */
                 this.graphOpen = !this.graphOpen;
                 //let graph_url = this.$route.path + '/bacteriagraph';
-                //this.$router.push(graph_url);
+                this.$router.push({
+                    name: 'StationGraph',
+                    params: {
+                        site_name: this.feature.properties.description,
+                        site_id: this.feature.id,
+                        graph_data: this.graph_data
+                    }
+                });
 
             },
             build_test_graph_data() {
