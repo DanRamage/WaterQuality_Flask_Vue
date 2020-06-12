@@ -6,9 +6,9 @@ PYCHARM_DEBUG= False
 SECRET_KEY = '123456790'
 SECRET_KEY_FILE = 'secret_key'
 
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_PATH = os.path.join(BASE_PATH, 'app/vue_frontend/dist')
-STATIC_PATH = os.path.join(BASE_PATH, 'app/vue_frontend/dist')
+#BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+#TEMPLATE_PATH = os.path.join(BASE_PATH, 'app/vue_frontend/dist')
+#STATIC_PATH = os.path.join(BASE_PATH, 'app/vue_frontend/dist')
 
 # Create in-memory database
 DATABASE_FILE = 'wq_db.sqlite'
