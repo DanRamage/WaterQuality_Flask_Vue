@@ -1223,8 +1223,7 @@ class SitesDataAPI(MethodView):
       for limit in limit_recs:
         limits[limit.limit_type] = {
           'min_limit': limit.min_limit,
-          'max_limit': limit.max_limit,
-          'icon': limit.icon
+          'max_limit': limit.max_limit
         }
     except Exception as e:
       current_app.logger.exception(e)
@@ -1392,6 +1391,18 @@ class SitesDataAPI(MethodView):
     return (client_results, ret_code, {'Content-Type': 'Application-JSON'})
 
 class SiteBacteriaDataAPI(MethodView):
+  def load_data_file(self, filename):
+    current_app.logger.debug("load_data_file Started.")
+
+    try:
+      current_app.logger.debug("Opening file: %s" % (filename))
+      with open(filename, 'r') as data_file:
+        return json.load(data_file)
+
+    except (IOError, Exception) as e:
+      current_app.logger.exception(e)
+    return None
+
   def get_requested_station_data(self, station, start_date_obj, end_date_obj, station_directory):
     start_time = time.time()
     current_app.logger.debug("get_requested_station_data Station: %s Start Date: %s End Date: %s"\
@@ -1485,13 +1496,35 @@ class SiteBacteriaDataAPI(MethodView):
 
           ret_code = 200
 
+          properties[site_type] = {'advisory': {'results': []}}
+
+          prediction_data = self.load_data_file(SITES_CONFIG[sitename]['prediction_file'])
+          if prediction_data is not None:
+            prediction_sites = prediction_data['contents']['stationData']['features']
+            #Find if the site has a prediction
+            ndx = locate_element(prediction_sites, lambda wq_site: wq_site['properties']['station'] == site)
+            if ndx != -1:
+              try:
+                data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
+                properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
+                                                     'level': prediction_sites[ndx]['properties']['ensemble'],
+                                                     'hours_data_valid': data_timeout
+                                                     }
+              except Exception as e:
+                current_app.logger.exception(e)
+
+
           site_data = self.get_requested_station_data(site,
                                                       start_date_obj,
                                                       end_date_obj,
                                                       SITES_CONFIG[sitename]['stations_directory'])
-          properties[site_type] = {'advisory': {'results': []}}
           if site_data is not None:
-            properties[site_type]['advisory']['results'] = site_data
+            data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+            properties[site_type]['advisory'] = {
+              'results': site_data,
+              'hours_data_valid': data_timeout}
+
+            #properties[site_type]['advisory']['results'] = site_data
           results = geojson.Feature(id=site_rec.site_name,
                                     geometry=geojson.Point((site_rec.longitude, site_rec.latitude)),
                                     properties=properties)

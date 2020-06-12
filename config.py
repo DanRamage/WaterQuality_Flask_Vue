@@ -1,7 +1,7 @@
 import os
 
-FLASK_DEBUG = True
-PYCHARM_DEBUG= True
+FLASK_DEBUG = False
+PYCHARM_DEBUG= False
 # Create dummy secrey key so we can use sessions
 SECRET_KEY = '123456790'
 SECRET_KEY_FILE = 'secret_key'
@@ -20,7 +20,7 @@ IS_MAINTENANCE_MODE = False
 if PYCHARM_DEBUG:
   LOGFILE='/Users/danramage/tmp/log/flask_plug_view_site.log'
 else:
-  LOGFILE='/var/log/wq_rest/devflaskvuesite.log'
+  LOGFILE='/var/log/wq_rest/devapiflaskvuesite.log'
 
 VALID_UPDATE_ADDRESSES = ['127.0.0.1', '129.252.139.113', '129.252.139.170']
 CURRENT_SITE_LIST = ['myrtlebeach', 'sarasota', 'charleston', 'killdevilhill']
@@ -58,7 +58,10 @@ if not PYCHARM_DEBUG:
         'stations_directory': '/home/xeniaprod/feeds/follybeach/monitorstations',
         'camera_statistics': '',
         'shellfish_closures': '/home/xeniaprod/feeds/follybeach/shellfish/shellfish_closures.json',
-        'ripcurrents': '/home/xeniaprod/feeds/follybeach/ripcurrent/CHS1.json'
+        'ripcurrents': '/home/xeniaprod/feeds/follybeach/ripcurrent/CHS1.json',
+        'camera_rest':  {
+          'url': 'https://www.floridaapdata.org/beach/response_beach.php'
+        }
       },
   }
 else:
