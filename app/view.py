@@ -1292,98 +1292,102 @@ class SitesDataAPI(MethodView):
                  'site_info': {}
                 }
 
+    try:
+      if sitename in SITES_CONFIG:
+        ret_code = 200
+        prediction_data = self.load_data_file(SITES_CONFIG[sitename]['prediction_file'])
+        advisory_data = self.load_data_file(SITES_CONFIG[sitename]['advisory_file'])
 
-    if sitename in SITES_CONFIG:
-      ret_code = 200
-      prediction_data = self.load_data_file(SITES_CONFIG[sitename]['prediction_file'])
-      advisory_data = self.load_data_file(SITES_CONFIG[sitename]['advisory_file'])
+        #Does site have shellfish data?
+        shellfish_data = None
+        if 'shellfish_closures' in SITES_CONFIG[sitename]:
+          shellfish_data = self.load_data_file(SITES_CONFIG[sitename]['shellfish_closures'])
+        #Does site have ripcurrents data?
+        ripcurrents_data = None
+        if 'ripcurrents' in SITES_CONFIG[sitename]:
+          ripcurrents_data = self.load_data_file(SITES_CONFIG[sitename]['ripcurrents'])
 
-      #Does site have shellfish data?
-      shellfish_data = None
-      if 'shellfish_closures' in SITES_CONFIG[sitename]:
-        shellfish_data = self.load_data_file(SITES_CONFIG[sitename]['shellfish_closures'])
-      #Does site have ripcurrents data?
-      ripcurrents_data = None
-      if 'ripcurrents' in SITES_CONFIG[sitename]:
-        ripcurrents_data = self.load_data_file(SITES_CONFIG[sitename]['ripcurrents'])
+        sample_sites = db.session.query(Sample_Site) \
+          .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
+          .join(Site_Type, Site_Type.id == Sample_Site.site_type_id) \
+          .filter(Project_Area.area_name == sitename).all()
 
-      sample_sites = db.session.query(Sample_Site) \
-        .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
-        .join(Site_Type, Site_Type.id == Sample_Site.site_type_id) \
-        .filter(Project_Area.area_name == sitename).all()
+        limits = self.get_advisory_limits(sitename)
+        if limits is not None:
+          results['advisory_info']['limits'] = limits
+        features = []
+        for site_rec in sample_sites:
+          if site_rec.site_type.name is not None:
+            site_type = site_rec.site_type.name
+          else:
+            site_type = 'Default'
+          #All sites will have some base properties.
+          properties = {'description': site_rec.description,
+                        'site_type': site_type,
+                        'site_name': site_rec.site_name
+                        }
+          #Default sites are water quality sites, so we will check the predicition and advisory data and add to our response.
+          if site_type == 'Default':
+            properties[site_type] = {'issues_advisories': site_rec.issues_advisories,
+                                      'under_advisory': site_rec.has_current_advisory,
+                                      'current_advisory_text': site_rec.advisory_text
+                                    }
 
-      limits = self.get_advisory_limits(sitename)
-      if limits is not None:
-        results['advisory_info']['limits'] = limits
-      features = []
-      for site_rec in sample_sites:
-        if site_rec.site_type.name is not None:
-          site_type = site_rec.site_type.name
-        else:
-          site_type = 'Default'
-        #All sites will have some base properties.
-        properties = {'description': site_rec.description,
-                      'site_type': site_type,
-                      'site_name': site_rec.site_name
-                      }
-        #Default sites are water quality sites, so we will check the predicition and advisory data and add to our response.
-        if site_type == 'Default':
-          properties[site_type] = {'issues_advisories': site_rec.issues_advisories,
-                                    'under_advisory': site_rec.has_current_advisory,
-                                    'current_advisory_text': site_rec.advisory_text
-                                  }
+            if prediction_data is not None:
+              prediction_sites = prediction_data['contents']['stationData']['features']
+              #Find if the site has a prediction
+              ndx = locate_element(prediction_sites, lambda wq_site: wq_site['properties']['station'] == site_rec.site_name)
+              if ndx != -1:
+                try:
+                  data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
+                  properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
+                                                       'level': prediction_sites[ndx]['properties']['ensemble'],
+                                                       'hours_data_valid': data_timeout
+                                                       }
+                except Exception as e:
+                  current_app.logger.exception(e)
+            if advisory_data is not None:
+              advisory_sites = advisory_data['features']
+              #Find if the site has advisory data
+              ndx = locate_element(advisory_sites, lambda wq_site: wq_site['properties']['station'] == site_rec.site_name)
+              if ndx != -1:
+                try:
+                  if len(advisory_sites[ndx]['properties']['test']['beachadvisories']):
+                    data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+                    properties[site_type]['advisory'] = {'date': advisory_sites[ndx]['properties']['test']['beachadvisories']['date'],
+                                                         'value': advisory_sites[ndx]['properties']['test']['beachadvisories']['value'],
+                                                         'hours_data_valid': data_timeout}
+                except Exception as e:
+                  current_app.logger.exception(e)
+          elif site_type == 'Shellfish' and shellfish_data is not None:
+            data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+            property = self.create_shellfish_properties(shellfish_data, site_rec, data_timeout)
+            if property is not None:
+              properties[site_type] = property
 
-          if prediction_data is not None:
-            prediction_sites = prediction_data['contents']['stationData']['features']
-            #Find if the site has a prediction
-            ndx = locate_element(prediction_sites, lambda wq_site: wq_site['properties']['station'] == site_rec.site_name)
-            if ndx != -1:
-              try:
-                data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
-                properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
-                                                     'level': prediction_sites[ndx]['properties']['ensemble'],
-                                                     'hours_data_valid': data_timeout
-                                                     }
-              except Exception as e:
-                current_app.logger.exception(e)
-          if advisory_data is not None:
-            advisory_sites = advisory_data['features']
-            #Find if the site has advisory data
-            ndx = locate_element(advisory_sites, lambda wq_site: wq_site['properties']['station'] == site_rec.site_name)
-            if ndx != -1:
-              try:
-                if len(advisory_sites[ndx]['properties']['test']['beachadvisories']):
-                  data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
-                  properties[site_type]['advisory'] = {'date': advisory_sites[ndx]['properties']['test']['beachadvisories']['date'],
-                                                       'value': advisory_sites[ndx]['properties']['test']['beachadvisories']['value'],
-                                                       'hours_data_valid': data_timeout}
-              except Exception as e:
-                current_app.logger.exception(e)
-        elif site_type == 'Shellfish' and shellfish_data is not None:
-          data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
-          property = self.create_shellfish_properties(shellfish_data, site_rec, data_timeout)
-          if property is not None:
-            properties[site_type] = property
+          elif site_type == 'Rip Current' and ripcurrents_data is not None:
+            data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+            property = self.create_rip_current_properties(ripcurrents_data, site_rec, data_timeout)
+            if property is not None:
+              properties[site_type] = property
+          elif site_type == 'Camera Site':
+            property = self.create_camera_properties(site_rec)
+            if property is not None:
+              properties[site_type] = property
 
-        elif site_type == 'Rip Current' and ripcurrents_data is not None:
-          data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
-          property = self.create_rip_current_properties(ripcurrents_data, site_rec, data_timeout)
-          if property is not None:
-            properties[site_type] = property
-        elif site_type == 'Camera Site':
-          property = self.create_camera_properties(site_rec)
-          if property is not None:
-            properties[site_type] = property
-
-        feature = geojson.Feature(id=site_rec.site_name,
-                                  geometry=geojson.Point((site_rec.longitude,site_rec.latitude)),
-                                  properties=properties)
-        features.append(feature)
-        results['sites'] = geojson.FeatureCollection(features)
+          feature = geojson.Feature(id=site_rec.site_name,
+                                    geometry=geojson.Point((site_rec.longitude,site_rec.latitude)),
+                                    properties=properties)
+          features.append(feature)
+          results['sites'] = geojson.FeatureCollection(features)
 
       client_results = json.dumps(results)
-
       current_app.logger.debug("IP: %s SiteDataAPI processed %d features" % (request.remote_addr, len(features)))
+
+    except Exception as e:
+      current_app.logger.exception(e)
+
+
     current_app.logger.debug('IP: %s SiteDataAPI get for site: %s finished in %f seconds' % (request.remote_addr,
                                                                                              sitename,
                                                                                              time.time() - start_time))
