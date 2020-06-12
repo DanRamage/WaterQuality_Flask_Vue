@@ -24,10 +24,10 @@ app.config['SQLALCHEMY_ECHO'] = SQLALCHEMY_ECHO
 """
 
 def create_app(config_file):
-  app = Flask(__name__,
-              static_folder=STATIC_PATH,
-              static_url_path='',
-              template_folder=TEMPLATE_PATH)
+  app = Flask(__name__)
+              #static_folder=STATIC_PATH,
+              #static_url_path='',
+              #template_folder=TEMPLATE_PATH)
 
   install_secret_key(app)
 
