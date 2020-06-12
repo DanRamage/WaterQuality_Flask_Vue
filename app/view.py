@@ -1535,8 +1535,11 @@ class SiteBacteriaDataAPI(MethodView):
 
       else:
         results = build_json_error(404, 'Site: %s not found' % (sitename))
+
+      results = geojson.dumps(results)
     except Exception as e:
       current_app.logger.exception(e)
+      results = build_json_error(501, 'Server experienced a procesing error')
 
     current_app.logger.debug('BacteriaDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
     return (results, ret_code, {'Content-Type': 'Application-JSON'})
