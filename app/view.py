@@ -1457,84 +1457,86 @@ class SiteBacteriaDataAPI(MethodView):
     ret_code = 404
     results = {}
 
-
-    if sitename in SITES_CONFIG:
-      start_date_obj = None
-      end_date_obj = None
-      if 'startdate' in request.args:
-        start_date = request.args['startdate']
-        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
-      else:
-        current_app.logger.error('IP: %s SiteBacteriaDataAPI ERROR get for %s site: %s startdate not supplied' % (request.remote_addr, sitename, site))
-        results = build_json_error(404, "startdate parameter must be included in POST.")
-      if 'enddate' in request.args:
-        end_date = request.args['enddate']
-        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-      else:
-        current_app.logger.error('IP: %s SiteBacteriaDataAPI ERROR get for %s site: %s enddate not supplied' % (request.remote_addr, sitename, site))
-        results = build_json_error(404, "enddate parameter must be included in POST.")
-      if start_date_obj is not None and end_date_obj is not None:
-        try:
-          site_rec = db.session.query(Sample_Site) \
-            .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
-            .join(Site_Type, Site_Type.id == Sample_Site.site_type_id) \
-            .filter(Sample_Site.site_name == site)\
-            .filter(Project_Area.area_name == sitename).one()
-        except exc.SQLAlchemyError as e:
-          ret_code = 404
-          results = build_json_error(404, 'Site: %s does not exist.' % (site))
-        except Exception as e:
-          current_app.logger.exception(e)
-          ret_code = 501
-          results = build_json_error(501, 'Server encountered a problem with the query.' % (site))
+    try:
+      if sitename in SITES_CONFIG:
+        start_date_obj = None
+        end_date_obj = None
+        if 'startdate' in request.args:
+          start_date = request.args['startdate']
+          start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
         else:
-          if site_rec.site_type.name is not None:
-            site_type = site_rec.site_type.name
+          current_app.logger.error('IP: %s SiteBacteriaDataAPI ERROR get for %s site: %s startdate not supplied' % (request.remote_addr, sitename, site))
+          results = build_json_error(404, "startdate parameter must be included in POST.")
+        if 'enddate' in request.args:
+          end_date = request.args['enddate']
+          end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+        else:
+          current_app.logger.error('IP: %s SiteBacteriaDataAPI ERROR get for %s site: %s enddate not supplied' % (request.remote_addr, sitename, site))
+          results = build_json_error(404, "enddate parameter must be included in POST.")
+        if start_date_obj is not None and end_date_obj is not None:
+          try:
+            site_rec = db.session.query(Sample_Site) \
+              .join(Project_Area, Project_Area.id == Sample_Site.project_site_id) \
+              .join(Site_Type, Site_Type.id == Sample_Site.site_type_id) \
+              .filter(Sample_Site.site_name == site)\
+              .filter(Project_Area.area_name == sitename).one()
+          except exc.SQLAlchemyError as e:
+            ret_code = 404
+            results = build_json_error(404, 'Site: %s does not exist.' % (site))
+          except Exception as e:
+            current_app.logger.exception(e)
+            ret_code = 501
+            results = build_json_error(501, 'Server encountered a problem with the query.' % (site))
           else:
-            site_type = 'Default'
-          # All sites will have some base properties.
-          properties = {'description': site_rec.description,
-                        'site_type': site_type,
-                        'site_name': site_rec.site_name
-                        }
+            if site_rec.site_type.name is not None:
+              site_type = site_rec.site_type.name
+            else:
+              site_type = 'Default'
+            # All sites will have some base properties.
+            properties = {'description': site_rec.description,
+                          'site_type': site_type,
+                          'site_name': site_rec.site_name
+                          }
 
-          ret_code = 200
+            ret_code = 200
 
-          properties[site_type] = {'advisory': {'results': []}}
+            properties[site_type] = {'advisory': {'results': []}}
 
-          prediction_data = self.load_data_file(SITES_CONFIG[sitename]['prediction_file'])
-          if prediction_data is not None:
-            prediction_sites = prediction_data['contents']['stationData']['features']
-            #Find if the site has a prediction
-            ndx = locate_element(prediction_sites, lambda wq_site: wq_site['properties']['station'] == site)
-            if ndx != -1:
-              try:
-                data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
-                properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
-                                                     'level': prediction_sites[ndx]['properties']['ensemble'],
-                                                     'hours_data_valid': data_timeout
-                                                     }
-              except Exception as e:
-                current_app.logger.exception(e)
+            prediction_data = self.load_data_file(SITES_CONFIG[sitename]['prediction_file'])
+            if prediction_data is not None:
+              prediction_sites = prediction_data['contents']['stationData']['features']
+              #Find if the site has a prediction
+              ndx = locate_element(prediction_sites, lambda wq_site: wq_site['properties']['station'] == site)
+              if ndx != -1:
+                try:
+                  data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
+                  properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
+                                                       'level': prediction_sites[ndx]['properties']['ensemble'],
+                                                       'hours_data_valid': data_timeout
+                                                       }
+                except Exception as e:
+                  current_app.logger.exception(e)
 
 
-          site_data = self.get_requested_station_data(site,
-                                                      start_date_obj,
-                                                      end_date_obj,
-                                                      SITES_CONFIG[sitename]['stations_directory'])
-          if site_data is not None:
-            data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
-            properties[site_type]['advisory'] = {
-              'results': site_data,
-              'hours_data_valid': data_timeout}
+            site_data = self.get_requested_station_data(site,
+                                                        start_date_obj,
+                                                        end_date_obj,
+                                                        SITES_CONFIG[sitename]['stations_directory'])
+            if site_data is not None:
+              data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
+              properties[site_type]['advisory'] = {
+                'results': site_data,
+                'hours_data_valid': data_timeout}
 
-            #properties[site_type]['advisory']['results'] = site_data
-          results = geojson.Feature(id=site_rec.site_name,
-                                    geometry=geojson.Point((site_rec.longitude, site_rec.latitude)),
-                                    properties=properties)
+              #properties[site_type]['advisory']['results'] = site_data
+            results = geojson.Feature(id=site_rec.site_name,
+                                      geometry=geojson.Point((site_rec.longitude, site_rec.latitude)),
+                                      properties=properties)
 
-    else:
-      results = build_json_error(404, 'Site: %s not found' % (sitename))
+      else:
+        results = build_json_error(404, 'Site: %s not found' % (sitename))
+    except Exception as e:
+      current_app.logger.exception(e)
 
     current_app.logger.debug('BacteriaDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
     return (results, ret_code, {'Content-Type': 'Application-JSON'})
