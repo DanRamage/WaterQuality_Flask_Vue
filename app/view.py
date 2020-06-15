@@ -1443,9 +1443,9 @@ class SiteBacteriaDataAPI(MethodView):
               value = float(value)
             except (Exception, ValueError) as e:
               value = result['value']
-              #Try stripping any characters that should not be there.
               current_app.logger.error("Converting value to float: %s had a problem, attemping cleaning." % (value))
-              value = value.replace('[', '').replace(']', '')
+              if type(value) == 'list':
+                value = value[0]
               try:
                 value = float(value)
               except (Exception, ValueError) as e:
