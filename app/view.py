@@ -1445,7 +1445,7 @@ class SiteBacteriaDataAPI(MethodView):
               value = result['value']
               current_app.logger.error("Converting value to float: %s (%s) had a problem, attemping cleaning."\
                                        % (value, type(value)))
-              if type(value) is 'list':
+              if type(value) is list:
                 current_app.logger.error("Value is a list, getting first element")
                 value = value[0]
               try:
