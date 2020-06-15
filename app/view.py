@@ -1442,8 +1442,14 @@ class SiteBacteriaDataAPI(MethodView):
             try:
               value = float(value)
             except (Exception, ValueError) as e:
-              current_app.logger.error("Converting value to float: %s had a problem" % (value))
-              value = 10
+              #Try stripping any characters that should not be there.
+              current_app.logger.error("Converting value to float: %s had a problem, attemping cleaning." % (value))
+              value = value.replace('[', '').replace(']', '')
+              try:
+                value = float(value)
+              except (Exception, ValueError) as e:
+                current_app.logger.error("Converting value to float: %s had a problem" % (value))
+                value = 10
             results.append({'date': tst_date_obj.strftime('%Y-%m-%d %H:%M:%S'),
                             'value': value})
 
