@@ -1443,7 +1443,8 @@ class SiteBacteriaDataAPI(MethodView):
               value = float(value)
             except (Exception, ValueError) as e:
               value = result['value']
-              current_app.logger.error("Converting value to float: %s had a problem, attemping cleaning." % (value))
+              current_app.logger.error("Converting value to float: %s (%s) had a problem, attemping cleaning."\
+                                       % (value, type(value)))
               if type(value) is 'list':
                 current_app.logger.error("Value is a list, getting first element")
                 value = value[0]
