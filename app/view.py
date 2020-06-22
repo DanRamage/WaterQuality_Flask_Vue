@@ -1322,10 +1322,14 @@ class SitesDataAPI(MethodView):
           else:
             site_type = 'Default'
           #All sites will have some base properties.
-          properties = {'description': site_rec.description,
-                        'site_type': site_type,
-                        'site_name': site_rec.site_name
-                        }
+          properties = {
+            'description': site_rec.description,
+            'site_type': site_type,
+            'site_name': site_rec.site_name,
+            'project_area': {
+                'name': site_rec.project_site.display_name
+              }
+            }
           #Default sites are water quality sites, so we will check the predicition and advisory data and add to our response.
           if site_type == 'Default':
             properties[site_type] = {'issues_advisories': site_rec.issues_advisories,
@@ -1551,7 +1555,7 @@ class SiteBacteriaDataAPI(MethodView):
       current_app.logger.exception(e)
       results = build_json_error(501, 'Server experienced a procesing error')
 
-    current_app.logger.debug('BacteriaDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
+    current_app.logger.debug('SiteBacteriaDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
     return (results, ret_code, {'Content-Type': 'application/json'})
 
 
