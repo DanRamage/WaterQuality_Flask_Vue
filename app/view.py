@@ -1388,9 +1388,12 @@ class SitesDataAPI(MethodView):
                                     properties=properties)
           features.append(feature)
           results['sites'] = geojson.FeatureCollection(features)
+          client_results = json.dumps(results)
+          current_app.logger.debug("IP: %s SiteDataAPI processed %d features" % (request.remote_addr, len(features)))
+      else:
+        sites = list(SITES_CONFIG.keys())
 
-      client_results = json.dumps(results)
-      current_app.logger.debug("IP: %s SiteDataAPI processed %d features" % (request.remote_addr, len(features)))
+        client_results = build_json_error(400, "Site: %s is not a vaild site. Valid sites: %s" % (sitename,sites))
 
     except Exception as e:
       current_app.logger.exception(e)
