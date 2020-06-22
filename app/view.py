@@ -1287,10 +1287,11 @@ class SitesDataAPI(MethodView):
     start_time = time.time()
     current_app.logger.debug('IP: %s SiteDataAPI get for site: %s' % (request.remote_addr, sitename))
     ret_code = 501
-    results =  {'advisory_info': {},
-                 'sites': {},
-                 'site_info': {}
-                }
+    results =  {
+      'advisory_info': {},
+      'sites': {},
+      'project_area': {}
+    }
 
     try:
       if sitename in SITES_CONFIG:
@@ -1316,7 +1317,13 @@ class SitesDataAPI(MethodView):
         if limits is not None:
           results['advisory_info']['limits'] = limits
         features = []
-        for site_rec in sample_sites:
+        for ndx,site_rec in enumerate(sample_sites):
+          #We set the project info once.
+          if ndx == 0:
+            results['project_area'] = {
+              'name': site_rec.project_site.display_name
+            }
+
           if site_rec.site_type.name is not None:
             site_type = site_rec.site_type.name
           else:
@@ -1326,9 +1333,6 @@ class SitesDataAPI(MethodView):
             'description': site_rec.description,
             'site_type': site_type,
             'site_name': site_rec.site_name,
-            'project_area': {
-                'name': site_rec.project_site.display_name
-              }
             }
           #Default sites are water quality sites, so we will check the predicition and advisory data and add to our response.
           if site_type == 'Default':
