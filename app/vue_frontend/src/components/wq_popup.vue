@@ -4,6 +4,9 @@
              class="card wq-card"
         >
             <div class="card-header">
+                Water Quality Site
+            </div>
+                <!--
                 <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item">
                         <a class="nav-link"
@@ -22,6 +25,50 @@
                     </li>
                 </ul>
             </div>
+                -->
+            <div class="card-body">
+                <div v-if="hasAdvisoryData">
+                    <div class="card-title font-avenir">
+                        <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
+                        Site: {{feature.properties.description}}
+                    </div>
+                </div>
+                <div v-else>
+                    <div class="card-title font-avenir">Site: {{feature.properties.description}}</div>
+                </div>
+                <div  class="card-subtitle avenir-font-light">ID: {{feature.id}}</div>
+                <div v-if="hasAdvisoryData">
+                    <div class="card-text mt-3">
+                        <p>
+                            <span class="font-avenir d-inline-block">
+                                <b>Bacteria Data: {{advisoryValue}} </b>
+                                    <button type="button"
+                                            class="btn btn-outline-info btn-sm mb-1"
+                                            @click="openGraph()">
+                                        Open Graph
+                                    </button>
+
+                            </span>
+                            <br>
+                            <span class="ml-4 avenir-font-light">Date: {{advisoryDate}}</span>
+                            <br>
+                            <b v-if='isDataFresh("advisory") == false' class="ml-4 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
+                        </p>
+                    </div>
+                </div>
+                <div v-if="hasNowcastData">
+                    <div class="card-text mt-3">
+                        <p>
+                            <span class="font-avenir"><b>Nowcast: {{nowcastsValue}}</b></span>
+                            <br>
+                            <span class="ml-4 avenir-font-light">Date: {{nowcastsDate}}</span>
+                            <br>
+                            <b v-if='isDataFresh("nowcasts") == false' class="ml-4 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!--
             <div class="tab-content card-body">
                 <div id="advisory-data"
                      class="tab-pane"
@@ -69,11 +116,6 @@
                      class="tab-pane"
                      ref="advisory_graph"
                      :class="[graph_active ? 'active show' : '']">
-                    <!--
-                     :class="[graph_active ? 'active show' : '', graphOpen ? 'graph-fullscreen' : 'graph-normal' ]"
-                     :style="{width: graphOpen ? tabFullScreenWidth : '',
-                                height: graphOpen ? tabFullScreenHeight : ''}"
-                    -->
                     <div v-if="hasAdvisoryData">
                         <div class="card-title font-avenir">
                             <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
@@ -84,33 +126,15 @@
                         <div class="card-title font-avenir">Site: {{feature.properties.description}}</div>
                     </div>
                     <div  class="card-subtitle avenir-font-light">ID: {{feature.id}}</div>
-                    <div clas="card-text text-center">
+                    <div class="card-text text-center">
                         Bacteria per 100 mL
-                        <!--
-                        <router-link
-                                :to="{name: 'StationGraph'}"
-                                tag="button">
-                            Open Graph
-                        </router-link>
-                        -->
 
                         <button type="button"
                                 class="btn btn-primary btn-sm"
                                 @click="openGraph()">
 
-                                <!--
-                                v-on:click='openGraph()'
-                               -->
                             Open Graph
                         </button>
-                        <!--
-                        <div v-if="graphOpen">
-                            <ModalGraph :feature="feature"
-                                        :graph_data="graph_data"
-                                        @modal_graph_closed="graphOpen=false">
-                            </ModalGraph>
-                        </div>
-                        -->
                     </div>
                     <div
                          ref="graph_column"
@@ -127,14 +151,16 @@
                     </div>
                 </div>
             </div>
+            -->
         </div>
     </div>
 </template>
 
 <script>
+    //import moment from 'moment/src/moment';
     import moment from 'moment';
     import FeatureUtils from "../utilities/feature_funcs";
-    import WQPlot from "@/components/scatter_plot";
+    //import WQPlot from "@/components/scatter_plot";
     //import ModalGraph from "@/components/modal_graph"
     //import StationGraph from "@/components/station_graph"
     import DataAPI from "../utilities/rest_api";
@@ -149,7 +175,7 @@
         components: {
             //ModalGraph,
             //StationGraph,
-            WQPlot
+            //WQPlot
         },
         data() {
             return {
@@ -315,11 +341,13 @@
                 }
             },
             openGraph: function() {
+                /*
                 console.log("expandGraphClick handled. Window height: " + window.innerHeight
                     + " Window width: " + window.innerWidth
                     + " graph column height: " + this.$refs.graph_column.clientHeight
                     + " graph column width: " + this.$refs.graph_column.clientWidth
                 );
+                */
                 //We get the position of the popup if we don't already have it. When we expand the graph, we want to
                 //be able to collapse it back to original location.
                 //

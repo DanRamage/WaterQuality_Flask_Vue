@@ -1,17 +1,25 @@
 <template>
-    <div class="container-fluid full-graph">
+    <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                <button type="button" class="btn btn-primary" @click="$router.go(-1)">&laquo; Back</button>
+                <button type="button" class="btn btn-primary avenir-font background_color" @click="$router.go(-1)">&laquo; Back</button>
                 <div class="card-title font-avenir">
-                    Site: {{site_name}}
+                    <h2>Site: {{site_name}}</h2>
                 </div>
                 <div class="card-subtitle avenir-font-light">
-                    ID: {{site_id}}
+                   <h3>ID: {{site_id}}</h3>
+                </div>
+                <div ref="days_buttons" class="btn-group">
+                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 30}" @click="daysButtonClick($event, 30)">30 days</button>
+                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 60}" @click="daysButtonClick($event,60)">60 days</button>
+                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 90}" @click="daysButtonClick($event,90)">90 days</button>
+                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 180}" @click="daysButtonClick($event,180)">180 days</button>
+                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 365}" @click="daysButtonClick($event,365)">365 days</button>
                 </div>
                 <div class="row">
                     <div class="col-12 full-graph">
-                        <WQPlot :chart_options="chart_options"
+                        <WQPlot ref="station_graph"
+                                :chart_options="chart_options"
                                 id='station_graph'
                                 :station_data="graph_data">
                         </WQPlot>
@@ -23,15 +31,18 @@
 </template>
 
 <script>
+    //import moment from 'moment/src/moment';
+    import moment from 'moment';
+    import DataAPI from "../utilities/rest_api";
+
     import WQPlot from "@/components/scatter_plot";
     import Highcharts from 'highcharts';
+    //import FeatureUtils from "../utilities/feature_funcs";
 
     export default {
         name: 'StationGraph',
         props: {
-            'site_name': {type: String, default: 'Site Name'},
             'site_id': {type: String, default: 'Site Id'},
-            'graph_data': {type: Array, default: function() {return []}}
         },
         components: {
             WQPlot
@@ -39,6 +50,10 @@
         data()
         {
             return {
+                activeBtn: 365,
+                site_description: '',
+                graph_data: [],
+                chart_ref: undefined,
                 chart_options: {
                     chart: {
                         backgroundColor: 'rgba(0,0,0,0)',
@@ -130,6 +145,7 @@
         },
         mounted() {
             console.log("StationGraph mounted.");
+
             //We aren't passing the props in the vue route path, so we check the params to then set the properties.
             if('params' in this.$route) {
                 if('site_id' in this.$route.params)
@@ -140,13 +156,46 @@
                 {
                     this.site_name = this.$route.params.site_name;
                 }
+                /*
                 if('graph_data' in this.$route.params)
                 {
                     this.graph_data = this.$route.params.graph_data;
                 }
+                */
             }
+
+            //We pull the last 365 days worth of data to show.
+            this.chart_ref = this.$refs.station_graph;
+            this.pastData(365);
         },
         methods: {
+            daysButtonClick(button_clicked, days) {
+                this.activeBtn = days;  //We use this to toggle the active class on the button.≠≠
+                this.pastData(days);
+            },
+            pastData(days_back) {
+                console.log("Retrieving: " + days_back + " days of data.")
+                let vm=this;
+                let location_site_name = this.$store.state.site_name;
+                let start_date = moment().subtract(days_back, 'days').format("YYYY-MM-DD 00:00:00");
+                let end_date = moment.utc().format("YYYY-MM-DD HH:mm:ss");
+                this.graph_data = [];
+                DataAPI.GetSiteData(location_site_name, this.site_id, start_date, end_date)
+                    .then(response => {
+                        vm.feature_data = response.data;
+                        let site_type = vm.feature_data.properties.site_type;
+                        if (site_type in vm.feature_data.properties) {
+                            vm.feature_data.properties[site_type].advisory.results.forEach(function (rec) {
+                                let date_val = moment(rec.date);
+                                vm.graph_data.push([date_val.valueOf(), rec.value]);
+                            });
+                            vm.chart_ref.chart.xAxis[0].setExtremes(moment.utc().subtract(days_back, "days").valueOf(), moment.utc().valueOf());
+
+                        }
+                    })
+                    .catch(error => console.error(error));
+
+            },
             onClose() {
                 console.log("onClose modal_graph_closed event emitted.");
                 this.$emit("modal_graph_closed");
@@ -159,4 +208,8 @@
         width: 100%;
         height: 100%;
     }
+    .background_color {
+        background-color: rgba(0, 61, 126, .85);
+    }
+
 </style>

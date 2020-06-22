@@ -33,6 +33,7 @@
 
 <script>
     import Vue from 'vue';
+    //import moment from 'moment/src/moment';
     import moment from 'moment';
     import FeatureUtils from "../utilities/feature_funcs";
 

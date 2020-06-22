@@ -1,5 +1,20 @@
+//const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+//    .BundleAnalyzerPlugin;
+
+var webpack = require('webpack');
 module.exports = {
-    //indexPath: process.env.NODE_ENV === 'production' ? '../../wq_flask/app/static/intro_page.html' : '/dist/index.html',
+    configureWebpack: {
+
+        plugins: [
+            //new BundleAnalyzerPlugin(),
+            new webpack.IgnorePlugin({
+                resourceRegExp: /^\.\/locale$/,
+                contextRegExp: /moment$/
+            })
+        ],
+    },
+
+//indexPath: process.env.NODE_ENV === 'production' ? '../../wq_flask/app/static/intro_page.html' : '/dist/index.html',
     //publicPath: process.env.NODE_ENV === 'production' ? '../../wq_flask/app/static' : '/dist/static',
     //assetsDir: process.env.NODE_ENV === 'production' ? 'vue' : '',
     /*
@@ -20,5 +35,6 @@ module.exports = {
         }
     },
     */
-    chainWebpack: config => config.optimization.minimize(false)
+    chainWebpack: config => config.optimization.minimize(false),
+
 };

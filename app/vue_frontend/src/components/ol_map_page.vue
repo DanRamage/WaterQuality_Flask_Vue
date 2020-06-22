@@ -22,7 +22,17 @@
                 <b-button class="btn-outline-primary p-2 ml-2" v-bind:class="[nowcastActive ? 'active' : '']"
                           variant="outline-primary"
                           v-on:click="dataTypeClick('nowcast')"><b>Nowcast</b></b-button>
-                <p class="text-center">
+
+                <b-dropdown id="layer_dropdown" class="layer_dropdown mt-4" :text="current_layer_name">
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'm')">Road</b-dropdown-item>
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 's')">Satellite</b-dropdown-item>
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'y')">Hybrid Satellite</b-dropdown-item>
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'p')">Hybrid Terrain</b-dropdown-item>
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'r')">Altered Road</b-dropdown-item>
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 't')">Terrain</b-dropdown-item>
+                </b-dropdown>
+
+                <p class="text-center mt-4">
                     <a href="#" class="text-white card-link">Bacteria Sources</a>
                 </p>
                 <p class="text-center">
@@ -42,7 +52,7 @@
                     data-projection="EPSG:4326">
                 <vl-view :center.sync="center" :rotation.sync="rotation"></vl-view>
                 <vl-layer-tile>
-                    <vl-source-xyz :url="layer_url" attributions="string or array" />
+                    <vl-source-xyz :url="current_layer_url" attributions="string or array" />
                 </vl-layer-tile>
                 <vl-layer-vector id="sites">
                     <vl-source-vector ref="site_vector_layer" :features.sync="features"></vl-source-vector>
@@ -157,7 +167,11 @@
                 rotation: 0,
                 features: [],
                 loading: false,
-                layer_url: 'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
+                //Roadmap, Terrain, Altered Roadmap, Satellite, Terrain Only, Hybrid
+                google_layers: ['m', 'p', 'r', 's', 't', 'y'],
+                current_google_layer: 'm',
+                current_layer_url: '',
+                current_layer_name: "Road",
                 selectedFeatures: [],
                 advisory_limits: undefined,
                 nowcastActive: false,
@@ -169,6 +183,7 @@
         mounted () {
             let vm = this;
             this.loading = true;
+            this.current_layer_url = `http://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
             let path = window.location.pathname;
             if (path.length) {
                 let sitename = path.split('/');
@@ -340,6 +355,22 @@
                 this.sidebarActive = !this.sidebarActive;
                 console.debug("sidebarButtonClick clicked: " + this.sidebarActive);
             },
+            layerSelected(event, layer_type, layer_selected) {
+                layer_type;
+                //Set the name of the current layer selected in dropdown.
+                this.current_layer_name = event.target.text;
+                //Build the URL for the XYZ google layer.
+                this.current_google_layer = layer_selected;
+                this.current_layer_url = `http://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
+            },
+        },
+        computed: {
+            map_layer_url: function()
+            {
+                let layer_url = `http://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
+                console.log("map_layer_url: " + layer_url);
+                return(layer_url);
+            }
         },
         watch: {
             /*
@@ -407,6 +438,20 @@
         margin-top: 240px !important;
     }
     */
+    .layer_dropdown > button {
+        background-color: rgba(0, 61, 126, .85);
+        border-color: #FFFFFF;
+        opacity: 0.75;
+    }
+
+    .layer_dropdown > .btn-secondary:hover,
+    .layer_dropdown > .btn-secondary:focus,
+    .layer_dropdown > .btn-secondary:active {
+        color: rgba(0, 61, 126, .85);
+        background-color: #FFFFFF;
+        opacity: 0.75;
+    }
+
 </style>
 <style scoped>
 
@@ -512,9 +557,5 @@
     }
     .blue-background_color {
         background-color: rgba(0, 61, 126, .85);
-    }
-    .swimmer-icon {
-        width: 25px;
-        height: 25px;
     }
 </style>

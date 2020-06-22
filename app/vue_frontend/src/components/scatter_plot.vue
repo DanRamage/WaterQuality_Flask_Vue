@@ -10,6 +10,7 @@
 <script>
 
     import Highcharts from 'highcharts';
+    //import moment from 'moment/src/moment';
     import moment from 'moment';
 
     export default {
@@ -42,6 +43,7 @@
                     this.chart.series[0].setData(this.station_data);//({data: this.station_data, name: "Bacteria Counts"});
                     this.chart.xAxis[0].setExtremes(moment.utc().subtract(365, "days").valueOf(), moment.utc().valueOf());
                 }
+                vm.chart.setSize(vm.width, vm.height);
             });
         },
         computed: {
@@ -81,9 +83,9 @@
                 if(this.chart === undefined) {
                     this.chart = new Highcharts.chart(this.id, this.chart_options);
                 }
-                this.chart.setSize(this.width, this.height);
+                //this.chart.setSize(this.width, this.height);
                 this.chart.series[0].setData(this.station_data);
-                this.chart.xAxis[0].setExtremes(moment.utc().subtract(365, "days").valueOf(), moment.utc().valueOf());
+                //this.chart.xAxis[0].setExtremes(moment.utc().subtract(365, "days").valueOf(), moment.utc().valueOf());
 
             },
             /*

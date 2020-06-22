@@ -1392,7 +1392,7 @@ class SitesDataAPI(MethodView):
                                                                                              sitename,
                                                                                              time.time() - start_time))
 
-    return (client_results, ret_code, {'Content-Type': 'Application-JSON'})
+    return (client_results, ret_code, {'Content-Type': 'application/json'})
 
 class SiteBacteriaDataAPI(MethodView):
   def load_data_file(self, filename):
@@ -1552,7 +1552,7 @@ class SiteBacteriaDataAPI(MethodView):
       results = build_json_error(501, 'Server experienced a procesing error')
 
     current_app.logger.debug('BacteriaDataAPI get for site: %s finished in %f seconds' % (sitename, time.time() - start_time))
-    return (results, ret_code, {'Content-Type': 'Application-JSON'})
+    return (results, ret_code, {'Content-Type': 'application/json'})
 
 
 def build_json_error(error_code, error_message):
