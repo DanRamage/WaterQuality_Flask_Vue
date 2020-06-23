@@ -1348,7 +1348,11 @@ class SitesDataAPI(MethodView):
               if ndx != -1:
                 try:
                   data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS['Nowcast']
-                  properties[site_type]['nowcasts'] = {'date': prediction_data['contents']['run_date'],
+                  if type(prediction_data['contents']['run_date']) is not list:
+                    run_date = prediction_data['contents']['run_date']
+                  else:
+                    run_date = prediction_data['contents']['run_date'][0]
+                  properties[site_type]['nowcasts'] = {'date': run_date,
                                                        'level': prediction_sites[ndx]['properties']['ensemble'],
                                                        'hours_data_valid': data_timeout
                                                        }
