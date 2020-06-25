@@ -1391,9 +1391,9 @@ class SitesDataAPI(MethodView):
                                     geometry=geojson.Point((site_rec.longitude,site_rec.latitude)),
                                     properties=properties)
           features.append(feature)
-          results['sites'] = geojson.FeatureCollection(features)
-          client_results = json.dumps(results)
-          current_app.logger.debug("IP: %s SiteDataAPI processed %d features" % (request.remote_addr, len(features)))
+        results['sites'] = geojson.FeatureCollection(features)
+        client_results = json.dumps(results)
+        current_app.logger.debug("IP: %s SiteDataAPI processed %d features" % (request.remote_addr, len(features)))
       else:
         sites = list(SITES_CONFIG.keys())
 
