@@ -1,22 +1,26 @@
 <template>
     <div class="container-fluid">
         <div class="card">
-            <div class="card-body">
-                <button type="button" class="btn btn-primary avenir-font background_color" @click="$router.go(-1)">&laquo; Back</button>
+            <div class="card-body data-graph">
+                <button type="button" class="app-button-style btn btn-primary avenir-font background_color" @click="$router.go(-1)">&laquo; Back</button>
                 <div class="card-title font-avenir">
                     <h2>Site: {{site_name}}</h2>
                 </div>
                 <div class="card-subtitle avenir-font-light">
                    <h3>ID: {{site_id}}</h3>
                 </div>
-                <div ref="days_buttons" class="btn-group">
-                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 30}" @click="daysButtonClick($event, 30)">30 days</button>
-                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 60}" @click="daysButtonClick($event,60)">60 days</button>
-                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 90}" @click="daysButtonClick($event,90)">90 days</button>
-                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 180}" @click="daysButtonClick($event,180)">180 days</button>
-                    <button type="button" class="btn btn-outline-info" :class="{active: activeBtn === 365}" @click="daysButtonClick($event,365)">365 days</button>
-                </div>
                 <div class="row">
+                    <div class="col-12">
+                        <div ref="days_buttons" class="btn-group">
+                            <button type="button" class="app-button-style btn btn-outline-primary" :class="{active: activeBtn === 30}" @click="daysButtonClick($event, 30)">30 days</button>
+                            <button type="button" class="app-button-style btn btn-outline-primary" :class="{active: activeBtn === 60}" @click="daysButtonClick($event,60)">60 days</button>
+                            <button type="button" class="app-button-style btn btn-outline-primary" :class="{active: activeBtn === 90}" @click="daysButtonClick($event,90)">90 days</button>
+                            <button type="button" class="app-button-style btn btn-outline-primary" :class="{active: activeBtn === 180}" @click="daysButtonClick($event,180)">180 days</button>
+                            <button type="button" class="app-button-style btn btn-outline-primary" :class="{active: activeBtn === 365}" @click="daysButtonClick($event,365)">365 days</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
                     <div class="col-12 full-graph">
                         <WQPlot ref="station_graph"
                                 :chart_options="chart_options"
@@ -50,13 +54,13 @@
         data()
         {
             return {
-                activeBtn: 365,
+                activeBtn: 60,
                 site_description: '',
                 graph_data: [],
                 chart_ref: undefined,
                 chart_options: {
                     chart: {
-                        backgroundColor: 'rgba(0,0,0,0)',
+                        //backgroundColor: 'rgba(0,0,0,0)',
                         defaultSeriesType: 'scatter',
                         marginRight: 0,
                         marginLeft: 65,
@@ -106,13 +110,16 @@
                         labels: {
                             formatter: function () {
                                 return this.value < 10 ? 1 : this.value;
+                            },
+                            style: {
+                                "color": "#FFFFFF"
                             }
                         },
                         gridLineWidth: 0,
                         lineWidth: 1,
                         title: {
                             text: 'Bacteria per 100 mL',
-                            margin: 25
+                            margin: 0
                         },
                         plotBands: [
                             {
@@ -164,9 +171,9 @@
                 */
             }
 
-            //We pull the last 365 days worth of data to show.
+            //We pull the last 60 days worth of data to show.
             this.chart_ref = this.$refs.station_graph;
-            this.pastData(365);
+            this.pastData(60);
         },
         methods: {
             daysButtonClick(button_clicked, days) {
@@ -208,8 +215,9 @@
         width: 100%;
         height: 100%;
     }
-    .background_color {
+    .data-graph {
         background-color: rgba(0, 61, 126, .85);
+        color: #FFFFFF
     }
 
 </style>

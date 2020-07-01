@@ -34,18 +34,23 @@
                   <span class="montserat-font">MYRTLE BEACH</span><br><span class="avenir-font-oblique">South Carolina</span>
                 </div>
               </b-nav-item>
-              <b-nav-item to="/charleston/map" exact exact-active-class="active">
+              <b-nav-item to="/surfside/map" exact exact-active-class="active">
                 <div class="text-white text-center" @mouseover="site_btn_hover($event, 2)">
+                  <span class="montserat-font">SURFSIDE</span><br><span class="avenir-font-oblique">South Carolina</span>
+                </div>
+              </b-nav-item>
+              <b-nav-item to="/charleston/map" exact exact-active-class="active">
+                <div class="text-white text-center" @mouseover="site_btn_hover($event, 3)">
                   <span class="montserat-font">CHARLESTON HARBOR</span><br><span class="avenir-font-oblique">South Carolina</span>
                 </div>
               </b-nav-item>
               <b-nav-item to="/follybeach/map" exact exact-active-class="active">
-                <div class="text-white text-center" @mouseover="site_btn_hover($event, 3)">
+                <div class="text-white text-center" @mouseover="site_btn_hover($event, 4)">
                   <span class="montserat-font">FOLLY BEACH</span><br><span class="avenir-font-oblique">South Carolina</span>
                 </div>
               </b-nav-item>
               <b-nav-item to="/sarasota/map" exact exact-active-class="active">
-                <div class="text-white text-center" @mouseover="site_btn_hover($event, 4)">
+                <div class="text-white text-center" @mouseover="site_btn_hover($event, 5)">
                   <span class="montserat-font">SARASOTA</span><br><span class="avenir-font-oblique">Florida</span>
                 </div>
               </b-nav-item>
@@ -78,7 +83,7 @@
             </b-carousel-slide>
             <b-carousel-slide
                     caption="Myrle Beach"
-                    text="South Carolina">
+                    text="South Carolina"
               >
               <template v-slot:img>
                 <img
@@ -89,8 +94,20 @@
               </template>
             </b-carousel-slide>
             <b-carousel-slide
+                    caption="Surfside"
+                    text="South Carolina"
+              >
+              <template v-slot:img>
+                <img
+                        class="d-block w-100"
+                        height="400"
+                        src="@/assets/images/surfside.jpg"
+                >
+              </template>
+            </b-carousel-slide>
+            <b-carousel-slide
                     caption="Charleston Harbor"
-                    text="South Carolina">
+                    text="South Carolina"
               >
               <template v-slot:img>
                 <img
@@ -102,19 +119,19 @@
             </b-carousel-slide>
             <b-carousel-slide
                     caption="Folly Beach"
-                    text="South Carolina">
+                    text="South Carolina"
               >
               <template v-slot:img>
                 <img
                         class="d-block w-100"
                         height="400"
-                        src="@/assets/images/charleston.jpg"
+                        src="@/assets/images/follybeach.jpg"
                 >
               </template>
             </b-carousel-slide>
             <b-carousel-slide
                     caption="Sarasota"
-                    text="Florida">
+                    text="Florida"
               >
               <template v-slot:img>
                 <img

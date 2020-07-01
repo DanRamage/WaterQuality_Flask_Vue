@@ -68,90 +68,6 @@
                     </div>
                 </div>
             </div>
-            <!--
-            <div class="tab-content card-body">
-                <div id="advisory-data"
-                     class="tab-pane"
-                     ref="advisory_data"
-                     v-bind:class="[wq_info_active ? 'active show' : '']"
-                >
-                    <div v-if="hasAdvisoryData">
-                        <div class="card-title font-avenir">
-                            <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
-                            Site: {{feature.properties.description}}
-                        </div>
-                    </div>
-                    <div v-else>
-                        <div class="card-title font-avenir">Site: {{feature.properties.description}}</div>
-                    </div>
-                    <div  class="card-subtitle avenir-font-light">ID: {{feature.id}}</div>
-                    <div class="tab-content" id="tab_content">
-                        <div v-if="hasAdvisoryData">
-                            <div class="card-text mt-3">
-                                <p>
-                            <span class="font-avenir">
-                                <b>Bacteria Data: {{advisoryValue}}</b>
-                            </span>
-                                    <br>
-                                    <span class="ml-4 avenir-font-light">Date: {{advisoryDate}}</span>
-                                    <br>
-                                    <b v-if='isDataFresh("advisory") == false' class="ml-4 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
-                                </p>
-                            </div>
-                        </div>
-                        <div v-if="hasNowcastData">
-                            <div class="card-text mt-3">
-                                <p>
-                                    <span class="font-avenir"><b>Nowcast: {{nowcastsValue}}</b></span>
-                                    <br>
-                                    <span class="ml-4 avenir-font-light">Date: {{nowcastsDate}}</span>
-                                    <br>
-                                    <b v-if='isDataFresh("nowcasts") == false' class="ml-4 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="advisory-graph"
-                     class="tab-pane"
-                     ref="advisory_graph"
-                     :class="[graph_active ? 'active show' : '']">
-                    <div v-if="hasAdvisoryData">
-                        <div class="card-title font-avenir">
-                            <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
-                            Site: {{feature.properties.description}}
-                        </div>
-                    </div>
-                    <div v-else>
-                        <div class="card-title font-avenir">Site: {{feature.properties.description}}</div>
-                    </div>
-                    <div  class="card-subtitle avenir-font-light">ID: {{feature.id}}</div>
-                    <div class="card-text text-center">
-                        Bacteria per 100 mL
-
-                        <button type="button"
-                                class="btn btn-primary btn-sm"
-                                @click="openGraph()">
-
-                            Open Graph
-                        </button>
-                    </div>
-                    <div
-                         ref="graph_column"
-                         :height="graph_height + 'px'"
-                         :width="graph_width + 'px'"
-                         >
-
-                            <WQPlot :chart_options="chart_options"
-                                    :id="feature.id+'_chart_div'"
-                                    :station_data="graph_data"
-                                    :height="graph_height"
-                                    :width="graph_width">
-                            </WQPlot>
-                    </div>
-                </div>
-            </div>
-            -->
         </div>
     </div>
 </template>
@@ -419,9 +335,10 @@
                 console.debug("advisoryDate started.");
                 if(this.hasAdvisoryData) {
                     let site_type = this.feature.properties.site_type;
-                    var date = moment(this.feature.properties[site_type].advisory.date).format("MMMM Do YYYY");
-                    console.debug("advisoryDate returning: " + date);
-                    return(date);
+                    let date_obj = moment(this.feature.properties[site_type].advisory.date);
+                    let date_str = date_obj.format("MMMM Do YYYY");
+                    console.debug("advisoryDate returning: " + date_str);
+                    return(date_str);
                 }
                 console.debug("advisoryDate returning: ");
                 return("");
@@ -453,9 +370,10 @@
                 console.debug("nowcastsDate started.");
                 if(this.hasAdvisoryData) {
                     let site_type = this.feature.properties.site_type;
-                    var date = moment(this.feature.properties[site_type].nowcasts.date).format("MMMM Do YYYY");
-                    console.debug("nowcastsDate returning: " + date);
-                    return(date);
+                    let date_obj = moment(this.feature.properties[site_type].nowcasts.date);
+                    let date_str = date_obj.format("MMMM Do YYYY");
+                    console.debug("nowcastsDate returning: " + date_str);
+                    return(date_str);
                 }
                 console.debug("nowcastsDate returning: ");
                 return("");

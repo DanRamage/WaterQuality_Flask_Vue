@@ -16,20 +16,23 @@
                     swimming advisories, but provide estimates of the likelihood that bacteria conditions
                     would warrant issuing an advisory if sampling were conducted that day.
                 </p>
-                <b-button class="btn-outline-primary p-2 mr-2" v-bind:class="[advisoryActive ? 'active' : '']"
-                          variant="outline-primary"
-                          v-on:click="dataTypeClick('advisory')"><b>Advisory</b></b-button>
-                <b-button class="btn-outline-primary p-2 ml-2" v-bind:class="[nowcastActive ? 'active' : '']"
+                <b-button class="btn-outline-primary p-2 mr-2" v-bind:class="[nowcastActive ? 'active' : '']"
                           variant="outline-primary"
                           v-on:click="dataTypeClick('nowcast')"><b>Nowcast</b></b-button>
+                <b-button class="btn-outline-primary p-2 ml-2" v-bind:class="[advisoryActive ? 'active' : '']"
+                          variant="outline-primary"
+                          v-on:click="dataTypeClick('advisory')"><b>Advisory</b></b-button>
 
                 <b-dropdown id="layer_dropdown" class="layer_dropdown mt-4" :text="current_layer_name">
+                    <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'openstreetmap', '')">Open Street Map</b-dropdown-item>
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'm')">Road</b-dropdown-item>
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 's')">Satellite</b-dropdown-item>
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'y')">Hybrid Satellite</b-dropdown-item>
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'p')">Hybrid Terrain</b-dropdown-item>
+                    <!--
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 'r')">Altered Road</b-dropdown-item>
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 't')">Terrain</b-dropdown-item>
+                    -->
                 </b-dropdown>
 
                 <p class="text-center mt-4">
@@ -84,18 +87,31 @@
 
                 </vl-interaction-select>
             </vl-map>
-            <b-button
+            <button
                     v-b-toggle.info-sidebar
                     id="sidebarCollapse"
-                    class="sidebar-button blue-background_color"
+                    class="btn btn-outline-info btn-sm"
                     v-on:click="sidebarButtonClick()"
-                    v-bind:class="[sidebarActive ? 'active' : '']">
+                    v-bind:class="[sidebarBtnActive ? 'active' : '']">
                 <span></span>
                 <span></span>
                 <span></span>
-            </b-button>
+            </button>
 
         </div>
+        <!-- This gives us the ability to know when the media queries/breaks occur -->
+        <span ref="mq_detector" id="mq-detector">
+            <span ref="visible_xs" class="d-block d-sm-none">
+            </span>
+            <span ref="visible_sm" class="d-none d-sm-block d-md-none">
+            </span>
+            <span ref="visible_md" class="d-none d-md-block d-lg-none">
+            </span>
+            <span ref="visible_lg" class="d-none d-lg-block d-xl-none">
+            </span>
+            <span ref="visible_xlg" class="d-none d-xl-block">
+            </span>
+        </span>
     </div>
 </template>
 
@@ -148,6 +164,7 @@
     import LowMarkerIcon from '@/assets/images/low_marker_25x25.png'
     import HiMarkerIcon from '@/assets/images/high_marker_25x25.png'
     import NoneMarkerIcon from '@/assets/images/none_marker_25x25.png'
+    import CameraIcon from '@/assets/images/webcam_icon.png'
 
     export default {
         name: 'OLMapPage',
@@ -174,30 +191,44 @@
                 current_layer_name: "Road",
                 selectedFeatures: [],
                 advisory_limits: undefined,
-                nowcastActive: false,
-                advisoryActive: true,
-                sidebarActive: false
-                //sitesLayerExtents: createEmpty()
+                nowcastActive: true,
+                advisoryActive: false,
+                sidebarActive: false,
+                sidebarBtnActive: false,
+                currMqNdx: undefined,
+                mqSelectors: undefined
             }
+        },
+        created() {
+
+            window.addEventListener("resize", this.resizeHandler);
         },
         mounted () {
             let vm = this;
             this.loading = true;
-            this.current_layer_url = `http://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
+
+            this.mqSelectors = [
+                this.$refs.visible_xs,
+                this.$refs.visible_sm,
+                this.$refs.visible_md,
+                this.$refs.visible_lg,
+                this.$refs.visible_xlg
+            ];
+
+
+            this.current_layer_url = `https://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
             let path = window.location.pathname;
             if (path.length) {
-                let sitename = path.split('/');
-                this.site_name = sitename[1];
-                //Put the site name in the store so other components have easy access and we don't have to pass it
-                //in everywhere.
-                this.$store.commit('updateSiteName', this.site_name);
-                console.debug("Retrieving initial site: " +  this.site_name + " data.")
-                DataAPI.GetSitesPromise(this.site_name, '').then(features => {
+                let location_site_name = this.$store.state.site_name;
+                console.debug("Retrieving initial site: " +  location_site_name + " data.")
+                DataAPI.GetSitesPromise(location_site_name, '').then(features => {
                     console.debug("Retrieved: " + features.data.sites.features.length + " features");
                     vm.features = features.data.sites.features;
                     if('limits' in features.data.advisory_info) {
                         this.$store.commit('updateAdvisoryLimits', features.data.advisory_info.limits);
                     }
+                    this.site_name = features.data.project_area.name;
+
                     vm.loading =  false;
 
                     setTimeout(function() {
@@ -218,7 +249,27 @@
 
             }
         },
+        destroyed() {
+            window.removeEventListener("resize", this.resizeHandler);
+        },
         methods: {
+            resizeHandler() {
+
+                for (var i = 0; i <= this.mqSelectors.length; i++) {
+                    if(this.mqSelectors[i].offsetLeft > 0)
+                    {
+                        if (this.currMqIdx != i) {
+                            this.currMqIdx = i;
+                            break;
+                        }
+                    }
+                }
+                if(this.currMqIdx < 3)
+                {
+                    this.sidebarActive = false;
+                }
+
+            },
             pointOnSurface: findPointOnSurface,
             siteStyleFactory() {
                 console.debug("siteStyleFactory started");
@@ -327,7 +378,12 @@
                             }
                         }
                     }
-
+                    else if(site_type == 'Camera Site') {
+                        icon = new Icon({
+                            src: CameraIcon,
+                            scale: icon_scale
+                        });
+                    }
                     let icon_style = [
                         new Style({
                             image: icon,
@@ -353,21 +409,26 @@
             },
             sidebarButtonClick() {
                 this.sidebarActive = !this.sidebarActive;
+                this.sidebarBtnActive = !this.sidebarBtnActive;
                 console.debug("sidebarButtonClick clicked: " + this.sidebarActive);
             },
             layerSelected(event, layer_type, layer_selected) {
-                layer_type;
                 //Set the name of the current layer selected in dropdown.
                 this.current_layer_name = event.target.text;
-                //Build the URL for the XYZ google layer.
-                this.current_google_layer = layer_selected;
-                this.current_layer_url = `http://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
+                if(layer_type === 'google') {
+                    //Build the URL for the XYZ google layer.
+                    this.current_google_layer = layer_selected;
+                    this.current_layer_url = `https://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
+                }
+                else if(layer_type == 'openstreetmap') {
+                    this.current_layer_url = 'https://c.tile.openstreetmap.org/${z}/${x}/${y}';
+                }
             },
         },
         computed: {
             map_layer_url: function()
             {
-                let layer_url = `http://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
+                let layer_url = `https://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
                 console.log("map_layer_url: " + layer_url);
                 return(layer_url);
             }
@@ -454,6 +515,9 @@
 
 </style>
 <style scoped>
+    .blue-background_color {
+        background-color: rgba(0, 61, 126, .85);
+    }
 
     .wrapper {
         display: flex;
@@ -555,7 +619,41 @@
     .sidebar-opacity {
         opacity: 0.9;
     }
-    .blue-background_color {
-        background-color: rgba(0, 61, 126, .85);
+    @media (max-width: 768px) {
+        #sidebar {
+            margin-left: -300px;
+        }
+        #sidebar.active {
+            margin-left: 0;
+        }
+        #sidebar.active {
+            margin-left: 0;
+            transform: none;
+        }
+        #sidebarCollapse span:first-of-type,
+        #sidebarCollapse span:nth-of-type(2),
+        #sidebarCollapse span:last-of-type {
+            transform: none;
+            opacity: 1;
+            margin: 5px auto;
+        }
+        #sidebarCollapse.active span {
+            margin: 0 auto;
+        }
+        #sidebarCollapse.active span:first-of-type {
+            transform: rotate(45deg) translate(2px, 2px);
+        }
+        #sidebarCollapse.active span:nth-of-type(2) {
+            opacity: 0;
+        }
+        #sidebarCollapse.active span:last-of-type {
+            transform: rotate(-45deg) translate(1px, -1px);
+        }
+        /*#sidebarCollapse span {
+            display: none;
+        }*/
+    }
+    #mq-detector {
+        visibility: hidden;
     }
 </style>

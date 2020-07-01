@@ -9,8 +9,11 @@
             <b-card-sub-title>
             </b-card-sub-title>
             <b-card-text class="mt-3">
-                <p>
-                </p>
+                <button type="button"
+                        class="btn btn-outline-info btn-sm mb-1"
+                        @click="openGraph()">
+                    Open Graph
+                </button>
             </b-card-text>
 
         </b-card>
@@ -20,7 +23,7 @@
 <script>
     import Vue from 'vue';
     //import moment from 'moment/src/moment';
-    import moment from 'moment';
+    //import moment from 'moment';
     import FeatureUtils from "../utilities/feature_funcs";
 
     import { LayoutPlugin, CardPlugin } from 'bootstrap-vue';
@@ -44,7 +47,7 @@
                 let properties = this.feature.properties;
                 let site_type = this.feature.properties.site_type;
                 let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
-                if(dataFresh) {
+                if (dataFresh) {
                     if (site_type in this.feature.properties) {
                         let value = this.feature.properties[site_type].advisory.value;
                         if (value == 'HIGH') {
@@ -56,6 +59,26 @@
                 }
                 return img_src;
             },
+            openGraph: function () {
+                this.graphOpen = !this.graphOpen;
+                let camera_name = '';
+                if(this.feature.id == 'Folly Beach Pier Southside')
+                {
+                    camera_name = "follypiersouthcam";
+                }
+                else if(this.feature.id == 'Folly Beach Pier Northside')
+                {
+                    camera_name = "follypiernorthcam";
+                }
+                this.$router.push({
+                    name: 'CameraGraph',
+                    params: {
+                        site_name: this.feature.properties.description,
+                        site_id: this.feature.id,
+                        camera_name: camera_name
+                    }
+                });
+            }
         },
         computed: {
             stationName: function() {
@@ -65,34 +88,8 @@
                     return (this.feature.properties[site_type].station)
                 }
                 return("")
-            },
-            getAdvisory: function() {
-                console.debug("getAdvisory started.");
-                let site_type = this.feature.properties.site_type;
-                if(site_type in this.feature.properties) {
-                    if('advisory' in this.feature.properties[site_type]) {
-                        return(this.feature.properties[site_type].advisory.value);
-                    }
-                }
-                return("");
-            },
-            advisoryDate: function() {
-                console.debug("advisoryDate started.");
-                let site_type = this.feature.properties.site_type;
-                if(site_type in this.feature.properties) {
-                    var date = moment(this.feature.properties[site_type].advisory.date).format("MMMM Do YYYY hh:mm a");
-                    return(date);
-                }
-                console.debug("advisoryDate is false.");
-                return("");
-            },
-            isDataFresh: function() {
-                let properties = this.feature.properties;
-                let site_type = this.feature.properties.site_type;
-                return(FeatureUtils.isDataFresh(properties[site_type].advisory));
             }
-
-        },
+        }
     }
 </script>
 <style scoped>

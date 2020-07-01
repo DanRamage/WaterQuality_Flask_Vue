@@ -21,6 +21,7 @@ export default new Vuex.Store({
             state.advisory_limits.update(limits);
         },
         updateSiteName(state, site_name) {
+            console.debug("Updating site_name from: " + state.site_name + " to: " + site_name);
             state.site_name = site_name;
         }
         /*
