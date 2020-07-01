@@ -33,6 +33,12 @@ if not PYCHARM_DEBUG:
         'advisory_file': '/home/xeniaprod/feeds/sc_wq/vb_engine/monitorstations/beachAdvisoryResults.json',
         'stations_directory': '/home/xeniaprod/feeds/sc_wq/vb_engine/monitorstations'
       },
+    'surfside':
+      {
+        'prediction_file': '/home/xeniaprod/feeds/sc_wq/vb_engine/Predictions.json',
+        'advisory_file': '/home/xeniaprod/feeds/sc_wq/vb_engine/monitorstations/beachAdvisoryResults.json',
+        'stations_directory': '/home/xeniaprod/feeds/sc_wq/vb_engine/monitorstations'
+      },
     'sarasota':
       {
         'prediction_file': '/home/xeniaprod/feeds/fl_wq/Predictions.json',
@@ -67,6 +73,12 @@ if not PYCHARM_DEBUG:
 else:
   SITES_CONFIG = {
     'myrtlebeach':
+      {
+        'prediction_file': '/Users/danramage/tmp/wq_feeds/sc_mb/Predictions.json',
+        'advisory_file': '/Users/danramage/tmp/wq_feeds/sc_mb/monitorstations/beachAdvisoryResults.json',
+        'stations_directory': '/Users/danramage/tmp/wq_feeds/sc_mb/monitorstations'
+      },
+    'surfside':
       {
         'prediction_file': '/Users/danramage/tmp/wq_feeds/sc_mb/Predictions.json',
         'advisory_file': '/Users/danramage/tmp/wq_feeds/sc_mb/monitorstations/beachAdvisoryResults.json',
