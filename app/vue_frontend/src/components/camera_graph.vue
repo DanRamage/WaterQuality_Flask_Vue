@@ -145,8 +145,7 @@
                     tooltip: {
                         formatter: function () {
                             let date_time = moment(this.x);
-                            return '<strong>Date:</strong> ' + date_time.format('YYYY-MM-DD hh:mm:ss') + '<br /><strong>Count:</strong> ' + Math.round(this.y);
-                            //return '<strong>Date:</strong> ' + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br /><strong>Count:</strong> ' + Math.round(this.y);
+                            return '<strong>Date:</strong> ' + date_time.format('DD MMM YYYY hh:mm a') + '<br /><strong>Count:</strong> ' + Math.round(this.y);
                         }
                     },
                     legend: {
