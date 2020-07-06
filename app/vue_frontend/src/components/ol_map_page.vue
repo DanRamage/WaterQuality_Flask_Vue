@@ -1,14 +1,10 @@
 <template>
     <div class="wrapper">
-    <!--
-    <b-container fluid class="h-100">
-    -->
-            <!--
-            <b-button v-b-toggle.info-sidebar class="sidebar-button">?</b-button>
-             -->
         <nav id="sidebar" v-bind:class="[sidebarActive ? 'active' : '']">
             <div class="h-100 px-5 py-4 montserat-font text-center text-white blue-background_color sidebar-opacity">
-                <h6><i><span v-text="title"></span></i></h6>
+                <a href="/">
+                    <h6><i><span v-text="title"></span></i></h6>
+                </a>
                 <h4><span v-text="site_name"></span></h4>
                 <p class="text-left">
                     Bacteria levels can change rapidly between sampling dates. To fill in the gaps,
@@ -68,20 +64,8 @@
                                 :position="feature.geometry.coordinates"
                                 :auto-pan="true"
                                 :auto-pan-animation="{ duration: 300 }">
-                        <div v-if='feature.properties.site_type == "Default"'>
-                            <WQPopup :feature="feature"></WQPopup>
-                        </div>
-                        <div v-else-if='feature.properties.site_type == "Shellfish"'>
-                            <ShellfishPopup :feature="feature"></ShellfishPopup>
-                        </div>
-                        <div v-else-if='feature.properties.site_type == "Rip Current"'>
-                            <RipcurrentPopup :feature="feature"></RipcurrentPopup>
-                        </div>
-                        <div v-else-if='feature.properties.site_type == "Camera Site"'>
-                            <CameraPopup :feature="feature"></CameraPopup>
-                        </div>
-                        <div v-else>
-                            <p>{{feature.id}}</p>
+                        <div>
+                            <component :is="getPopupComponent(feature)" v-bind:feature="feature"></component>
                         </div>
                     </vl-overlay>
 
@@ -153,6 +137,7 @@
     import ShellfishPopup from "@/components/shellfish_popup";
     import RipcurrentPopup from "@/components/riptide_popup";
     import CameraPopup from "@/components/camera_popup";
+    import UnknownTypePopup from "@/components/default_popup"
     import {findPointOnSurface} from 'vuelayers/lib/ol-ext'
     //import moment from 'moment';
 
@@ -173,7 +158,8 @@
             CameraPopup,
             RipcurrentPopup,
             ShellfishPopup,
-            'WQPopup': WQPopup
+            WQPopup,
+            UnknownTypePopup
         },
         data () {
             return {
@@ -220,7 +206,7 @@
             let path = window.location.pathname;
             if (path.length) {
                 let location_site_name = this.$store.state.site_name;
-                console.debug("Retrieving initial site: " +  location_site_name + " data.")
+                console.debug("Retrieving initial site: " +  location_site_name + " data.");
                 DataAPI.GetSitesPromise(location_site_name, '').then(features => {
                     console.debug("Retrieved: " + features.data.sites.features.length + " features");
                     vm.features = features.data.sites.features;
@@ -245,7 +231,28 @@
                         console.debug("nextTick mounted setting map extent.");
                     });*/
                 })
-                    .catch(error => console.error(error));
+                    .catch(error => {
+                        let error_message = '';
+                        let status_code = error.response.status;
+                        if('error' in error.response.data)
+                        {
+                            if('message' in error.response.data.error)
+                            {
+                                error_message = error.response.data.error.message;
+                            }
+                        }
+                        else {
+                            error_message = error.response.data;
+                        }
+                        console.error("Status code: " + status_code +". Error Msg: " + error_message);
+                        this.$router.push({
+                            name: '404',
+                            params: {
+                                error_message: error_message,
+                                status_code: status_code
+                            }
+                        });
+                    });
 
             }
         },
@@ -424,6 +431,25 @@
                     this.current_layer_url = 'https://c.tile.openstreetmap.org/${z}/${x}/${y}';
                 }
             },
+            /*
+            This allows us to dynamically choose the popup to use based on the site_type field.
+            */
+            getPopupComponent(feature) {
+                if(feature.properties.site_type == "Default")
+                {
+                    return(WQPopup);
+                }
+                else if(feature.properties.site_type == "Shellfish") {
+                    return(ShellfishPopup);
+                }
+                else if(feature.properties.site_type == "Rip Current") {
+                    return(RipcurrentPopup);
+                }
+                else if(feature.properties.site_type == "Camera Site") {
+                    return(CameraPopup);
+                }
+                return(UnknownTypePopup);
+            }
         },
         computed: {
             map_layer_url: function()

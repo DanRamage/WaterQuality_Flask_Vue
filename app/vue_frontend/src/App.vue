@@ -8,6 +8,7 @@
     import OLMapPage from "@/components/ol_map_page";
     import StationGraph from "@/components/station_graph";
     import CameraGraph from "@/components/camera_graph";
+    import ErrorPage from "@/components/error_page";
 
     export default {
         data () {
@@ -15,7 +16,7 @@
                 activeComponent: 'SplashPage'
             }
         },
-        components: {OLMapPage, SplashPage, StationGraph, CameraGraph},
+        components: {OLMapPage, SplashPage, StationGraph, CameraGraph, ErrorPage},
         created() {
             //We check the url we receive to see where we are going, splash page or one of the project sites.
             let to = this.$route;
@@ -67,6 +68,10 @@
                     //API requests.
                     this.$store.commit('updateSiteName', to.params.location);
                     this.activeComponent = 'CameraGraph';
+                }
+                else if(to.name == '404')
+                {
+                    this.activeComponent = 'ErrorPage';
                 }
             }
         },

@@ -66,7 +66,6 @@
 <script>
     import Vue from 'vue'
 
-    //import moment from 'moment/src/moment';
     import moment from 'moment';
     import DataAPI from "../utilities/rest_api";
 
@@ -107,6 +106,10 @@
                         text: "Total Objects Detected Per Hour"
                     },
                     colors: ['#333333'],
+                    time: {
+                        timezone: 'America/New_York',
+                        useUTC: false
+                    },
                     xAxis: {
                         endOnTick: true,
                         showLastLabel: false,
@@ -115,9 +118,12 @@
                             offset: 30
                         },
                         type: 'datetime',
+                        dateTimeLabelFormats : {
+                            day: '%e %b \'%y',
+                            hour: "%I:%M %p"
+                        },
                         /*
                         dateTimeLabelFormats: {
-                            day: '%e %b \'%y',
                             week: '%e %b \'%y',
                             month: '%e %b \'%y',
                             year: '%e %b \'%y',
@@ -138,7 +144,9 @@
                     },
                     tooltip: {
                         formatter: function () {
-                            return '<strong>Date:</strong> ' + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br /><strong>Count:</strong> ' + Math.round(this.y);
+                            let date_time = moment(this.x);
+                            return '<strong>Date:</strong> ' + date_time.format('YYYY-MM-DD hh:mm:ss') + '<br /><strong>Count:</strong> ' + Math.round(this.y);
+                            //return '<strong>Date:</strong> ' + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br /><strong>Count:</strong> ' + Math.round(this.y);
                         }
                     },
                     legend: {

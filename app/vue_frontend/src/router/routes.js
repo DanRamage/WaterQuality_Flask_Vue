@@ -2,7 +2,7 @@ import SplashPage from '@/components/splash_page'
 import OLMapPage from '@/components/ol_map_page'
 import StationGraph from '@/components/station_graph'
 import CameraGraph from '@/components/camera_graph'
-
+import  ErrorPage from '@/components/error_page'
 const routes = [
         {
             path: '/',
@@ -29,12 +29,12 @@ const routes = [
 
             ]
 
+        },
+        {
+            path: '/page error',
+            name: '404',
+            component: ErrorPage
         }
-        /*{
-            path: '/myrtlebeach/map',
-            name: 'OLMapPage',
-            component: OLMapPage
-        }*/
 
     ];
 
