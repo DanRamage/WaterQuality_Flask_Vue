@@ -41,9 +41,9 @@
     Vue.use(LayoutPlugin);
     Vue.use(CardPlugin);
 
-    let none_marker = require('@/assets/images/none_marker_25x25.png');
-    let low_marker = require('@/assets/images/low_marker_25x25.png');
-    let high_marker = require('@/assets/images/high_marker_25x25.png');
+    let none_marker = require('@/assets/images/shellfish_none_marker_25x25.png');
+    let low_marker = require('@/assets/images/shellfish_low_marker_25x25.png');
+    let high_marker = require('@/assets/images/shellfish_high_marker_25x25.png');
     export default {
         name: 'ShellfishPopup',
         props: ['feature'],

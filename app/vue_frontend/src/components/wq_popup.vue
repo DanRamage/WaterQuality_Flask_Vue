@@ -6,30 +6,10 @@
             <div class="card-header">
                 Water Quality Site
             </div>
-                <!--
-                <ul class="nav nav-tabs card-header-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           data-toggle="tab"
-                           v-on:click='tabClicked("data_tab")'
-                           v-bind:class="[wq_info_active ? 'active': '']">
-                            Water Quality Site
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab"
-                           v-on:click='tabClicked("graph_tab")'
-                           v-bind:class="[graph_active ? 'active': '']">
-                            Data
-                        </a>
-                    </li>
-                </ul>
-            </div>
-                -->
             <div class="card-body">
                 <div v-if="hasAdvisoryData">
                     <div class="card-title font-avenir">
-                        <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
+                        <img :src="getAdvisoryImage()" class="advisory_icon">
                         Site: {{feature.properties.description}}
                     </div>
                 </div>
@@ -73,12 +53,8 @@
 </template>
 
 <script>
-    //import moment from 'moment/src/moment';
     import moment from 'moment';
     import FeatureUtils from "../utilities/feature_funcs";
-    //import WQPlot from "@/components/scatter_plot";
-    //import ModalGraph from "@/components/modal_graph"
-    //import StationGraph from "@/components/station_graph"
     import DataAPI from "../utilities/rest_api";
     import Highcharts from 'highcharts';
 
@@ -89,9 +65,6 @@
         name: 'WQPopup',
         props: ['feature'],
         components: {
-            //ModalGraph,
-            //StationGraph,
-            //WQPlot
         },
         data() {
             return {
@@ -103,12 +76,12 @@
                 graph_width: 250,
                 graph_height: 250,
 
-                graphOpen: false,
-                tabNormalWidth: '100%',
-                tabNormalHeight: '100%',
-                tabFullScreenWidth: '100%',
-                tabFullScreenHeight: '100%',
-                graphInitialPosition: undefined,
+                //graphOpen: false,
+                //tabNormalWidth: '100%',
+                //tabNormalHeight: '100%',
+                //tabFullScreenWidth: '100%',
+                //tabFullScreenHeight: '100%',
+                //graphInitialPosition: undefined,
                 graph_data: [],
                 chart_options:
                     {
@@ -181,7 +154,7 @@
             }
         },
         mounted() {
-            this.graphInitialPosition = this.$parent.$el.getBoundingClientRect();
+            //this.graphInitialPosition = this.$parent.$el.getBoundingClientRect();
         },
         methods: {
             getAdvisoryImage() {
@@ -287,7 +260,7 @@
                     this.graph_height = window.innerHeight;
                 }
                 */
-                this.graphOpen = !this.graphOpen;
+                //this.graphOpen = !this.graphOpen;
                 //let graph_url = this.$route.path + '/bacteriagraph';
                 this.$router.push({
                     name: 'StationGraph',
@@ -401,7 +374,10 @@
     {
         font-size: 1.0rem
     }
-
+    .advisory_icon {
+        height: 25px;
+        width: 25px;
+    }
     .wq-card {
         /*font-family: 'Montserrat';*/
         color: rgba(0, 61, 126, .85);

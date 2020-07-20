@@ -22,6 +22,10 @@
             let to = this.$route;
 
             console.log("Initial url: " + to.path);
+            this.$gtag.pageview({
+                page_path: to.path,
+            });
+
             if(to.name == 'OLMapPage')
             {
                 //Pick apart the path and save the site name into the store so other components can use it for
@@ -44,6 +48,10 @@
         watch: {
             '$route' (to, from) {
                 console.log('Route changed from ' + from.path + ' to ' + to.path);
+                this.$gtag.pageview({
+                    page_path: to.path,
+                });
+
                 if(to.name == 'OLMapPage')
                 {
                     //Pick apart the path and save the site name into the store so other components can use it for

@@ -3,7 +3,7 @@
         <div class="card">
             <div class="card-body data-graph">
                 <button type="button" class="app-button-style btn btn-primary avenir-font background_color" @click="$router.go(-1)">&laquo; Back</button>
-                <div class="card-title font-avenir">
+                <div class="mt-4 card-title font-avenir">
                     <h2>Site: {{site_name}}</h2>
                 </div>
                 <div class="card-subtitle avenir-font-light">

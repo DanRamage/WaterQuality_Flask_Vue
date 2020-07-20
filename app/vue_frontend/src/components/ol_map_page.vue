@@ -30,7 +30,7 @@
                     <b-dropdown-item class="dropdown-item" @click="layerSelected($event, 'google', 't')">Terrain</b-dropdown-item>
                     -->
                 </b-dropdown>
-
+                <br>
                 <p class="text-center mt-4">
                     <a href="#" class="text-white card-link">Bacteria Sources</a>
                 </p>
@@ -50,9 +50,13 @@
                     :load-tiles-while-interacting="true"
                     data-projection="EPSG:4326">
                 <vl-view :center.sync="center" :rotation.sync="rotation"></vl-view>
-                <vl-layer-tile>
+                <vl-layer-tile :visible="xyz_layer_visible">
                     <vl-source-xyz :url="current_layer_url" attributions="string or array" />
                 </vl-layer-tile>
+                <vl-layer-tile :visible="osm_layer_visible">
+                    <vl-source-osm></vl-source-osm>
+                </vl-layer-tile>
+
                 <vl-layer-vector id="sites">
                     <vl-source-vector ref="site_vector_layer" :features.sync="features"></vl-source-vector>
                     <vl-style-func :factory="siteStyleFactory"></vl-style-func>
@@ -83,6 +87,11 @@
             </button>
 
         </div>
+
+        <div v-show="featureStylingCompleted">
+            <IconsLegend :icon_info="legend_icons"></IconsLegend>
+        </div>
+
         <!-- This gives us the ability to know when the media queries/breaks occur -->
         <span ref="mq_detector" id="mq-detector">
             <span ref="visible_xs" class="d-block d-sm-none">
@@ -140,6 +149,9 @@
     import UnknownTypePopup from "@/components/default_popup"
     import {findPointOnSurface} from 'vuelayers/lib/ol-ext'
     //import moment from 'moment';
+    import EventUtils from "../utilities/analytics_funcs";
+
+    import IconsLegend from "@/components/icons_legend";
 
     import Style from 'ol/style/Style';
     import Icon from 'ol/style/Icon';
@@ -150,6 +162,12 @@
     import HiMarkerIcon from '@/assets/images/high_marker_25x25.png'
     import NoneMarkerIcon from '@/assets/images/none_marker_25x25.png'
     import CameraIcon from '@/assets/images/webcam_icon.png'
+    import ShellfishLowMarkerIcon from '@/assets/images/shellfish_low_marker_25x25.png'
+    import ShellfishHiMarkerIcon from '@/assets/images/shellfish_high_marker_25x25.png'
+    import ShellfishNoneMarkerIcon from '@/assets/images/shellfish_none_marker_25x25.png'
+    import RipCurrentLowMarkerIcon from '@/assets/images/ripcurrent_low_marker_25x25.png'
+    import RipCurrentHiMarkerIcon from '@/assets/images/ripcurrent_high_marker_25x25.png'
+    import RipCurrentNoneMarkerIcon from '@/assets/images/ripcurrent_none_marker_25x25.png'
 
     export default {
         name: 'OLMapPage',
@@ -159,7 +177,8 @@
             RipcurrentPopup,
             ShellfishPopup,
             WQPopup,
-            UnknownTypePopup
+            UnknownTypePopup,
+            IconsLegend
         },
         data () {
             return {
@@ -170,11 +189,11 @@
                 rotation: 0,
                 features: [],
                 loading: false,
-                //Roadmap, Terrain, Altered Roadmap, Satellite, Terrain Only, Hybrid
-                google_layers: ['m', 'p', 'r', 's', 't', 'y'],
-                current_google_layer: 'm',
+                current_google_layer: 's',
                 current_layer_url: '',
-                current_layer_name: "Road",
+                current_layer_name: "Satellite",
+                xyz_layer_visible: true,
+                osm_layer_visible: false,
                 selectedFeatures: [],
                 advisory_limits: undefined,
                 nowcastActive: true,
@@ -182,7 +201,9 @@
                 sidebarActive: false,
                 sidebarBtnActive: false,
                 currMqNdx: undefined,
-                mqSelectors: undefined
+                mqSelectors: undefined,
+                legend_icons: [],
+                features_styled: 0
             }
         },
         created() {
@@ -192,6 +213,7 @@
         mounted () {
             let vm = this;
             this.loading = true;
+            this.features_styled = 0;
 
             this.mqSelectors = [
                 this.$refs.visible_xs,
@@ -262,7 +284,7 @@
         methods: {
             resizeHandler() {
 
-                for (var i = 0; i <= this.mqSelectors.length; i++) {
+                for (var i = 0; i < this.mqSelectors.length; i++) {
                     if(this.mqSelectors[i].offsetLeft > 0)
                     {
                         if (this.currMqIdx != i) {
@@ -286,6 +308,9 @@
                 */
                 var siteStyleFunction = function(feature, resolution) {
                     resolution;
+                    if(vm.features_styled < vm.features.length) {
+                        vm.features_styled += 1;
+                    }
                     let icon_scale = 0.75;
                     let properties = feature.getProperties();
                     let site_type = properties.site_type;
@@ -345,6 +370,15 @@
                                 }
                             }
                         }
+                        if(!(vm.legend_icons.includes('Water Quality'))) {
+                            vm.legend_icons.push("Water Quality");
+                            /*vm.legend_icons['Water Quality'] = {
+                                'low': LowMarkerIcon,
+                                'high': HiMarkerIcon,
+                                'none': NoneMarkerIcon
+                            }*/
+                        }
+                        vm;
                     }
                     else if(site_type == 'Shellfish')
                     {
@@ -355,16 +389,33 @@
                             let value = properties[site_type].advisory.value;
                             if (!value) {
                                 icon = new Icon({
-                                    src: LowMarkerIcon,
+                                    src: ShellfishLowMarkerIcon,
                                     scale: icon_scale
                                 });
                             } else {
                                 icon = new Icon({
-                                    src: HiMarkerIcon,
+                                    src: ShellfishHiMarkerIcon,
                                     scale: icon_scale
                                 });
                             }
                         }
+                        else {
+                            icon = new Icon({
+                                src: ShellfishNoneMarkerIcon,
+                                scale: icon_scale
+                            });
+                        }
+                        if(!(vm.legend_icons.includes('Shellfish'))) {
+                            vm.legend_icons.push("Shellfish");
+
+                            /*
+                            vm.legend_icons['Shellfish'] = {
+                                'low': ShellfishLowMarkerIcon,
+                                'high': ShellfishHiMarkerIcon,
+                                'none': ShellfishNoneMarkerIcon
+                            }*/
+                        }
+
                     }
                     else if(site_type == 'Rip Current')
                     {
@@ -374,22 +425,46 @@
                             let value = properties[site_type].advisory.value;
                             if (!value) {
                                 icon = new Icon({
-                                    src: LowMarkerIcon,
+                                    src: RipCurrentLowMarkerIcon,
                                     scale: icon_scale
                                 });
                             } else {
                                 icon = new Icon({
-                                    src: HiMarkerIcon,
+                                    src: RipCurrentHiMarkerIcon,
                                     scale: icon_scale
                                 });
                             }
                         }
+                        else {
+                            icon = new Icon({
+                                src: RipCurrentNoneMarkerIcon,
+                                scale: icon_scale
+                            });
+                        }
+                        if(!(vm.legend_icons.includes('Rip Current'))) {
+                            vm.legend_icons.push("Rip Current");
+
+                            /*
+                            vm.legend_icons['Rip Current'] = {
+                                'low': RipCurrentLowMarkerIcon,
+                                'high': RipCurrentHiMarkerIcon,
+                                'none': RipCurrentNoneMarkerIcon
+                            }*/
+                        }
+
                     }
                     else if(site_type == 'Camera Site') {
                         icon = new Icon({
                             src: CameraIcon,
                             scale: icon_scale
                         });
+                        if(!(vm.legend_icons.includes('Camera Site'))) {
+                            vm.legend_icons.push('Camera Site');
+                            /*vm.legend_icons['Camera Site'] = {
+                                'none': CameraIcon
+                            }*/
+                        }
+
                     }
                     let icon_style = [
                         new Style({
@@ -422,44 +497,62 @@
             layerSelected(event, layer_type, layer_selected) {
                 //Set the name of the current layer selected in dropdown.
                 this.current_layer_name = event.target.text;
+                this.osm_layer_visible = false;
+                this.xyz_layer_visible = false;
                 if(layer_type === 'google') {
+                    this.xyz_layer_visible = true;
                     //Build the URL for the XYZ google layer.
                     this.current_google_layer = layer_selected;
                     this.current_layer_url = `https://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
                 }
                 else if(layer_type == 'openstreetmap') {
-                    this.current_layer_url = 'https://c.tile.openstreetmap.org/${z}/${x}/${y}';
+                    this.osm_layer_visible = true;
                 }
             },
             /*
             This allows us to dynamically choose the popup to use based on the site_type field.
             */
             getPopupComponent(feature) {
+                /*Track the click event*/
+                /*this.$ga.event({
+                    eventCategory: 'SampleSiteClick',
+                    eventAction: 'click',
+                    eventLabel: feature.properties.description
+                });*/
+
                 if(feature.properties.site_type == "Default")
                 {
+                    EventUtils.log_event(this.$gtag, 'click', 'WQ Station', feature.properties.description, 0);
                     return(WQPopup);
                 }
                 else if(feature.properties.site_type == "Shellfish") {
+                    EventUtils.log_event(this.$gtag, 'click', 'Shellfish Station', feature.properties.description, 0);
                     return(ShellfishPopup);
                 }
                 else if(feature.properties.site_type == "Rip Current") {
+                    EventUtils.log_event(this.$gtag, 'click', 'Rip Current', feature.properties.description, 0);
                     return(RipcurrentPopup);
                 }
                 else if(feature.properties.site_type == "Camera Site") {
+                    EventUtils.log_event(this.$gtag, 'click', 'Camera Site', feature.properties.description, 0);
                     return(CameraPopup);
                 }
                 return(UnknownTypePopup);
             }
         },
         computed: {
-            map_layer_url: function()
-            {
-                let layer_url = `https://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
-                console.log("map_layer_url: " + layer_url);
-                return(layer_url);
+            featureStylingCompleted: function() {
+                if(this.features.length > 0 && (this.features_styled == this.features.length))
+                {
+                    console.log("featureStylingCompleted styled all features.");
+                    return(true);
+                }
+                console.log("featureStylingCompleted styled: " + this.features_styled + " features.");
+                return(false);
             }
         },
         watch: {
+
             /*
             features: _.debounce(function() {
                 this.$refs.site_map.$map.updateSize();

@@ -3,15 +3,19 @@
         <div class="card">
             <div class="card-body object-counts">
                 <button type="button" class="app-button-style btn btn-primary avenir-font" @click="$router.go(-1)">&laquo; Back</button>
-                <div class="card-title font-avenir">
-                    <h2>Site: {{site_name}}</h2>
+                <div class="mt-4 card-title font-avenir">
+                    <h4>Site: {{site_name}}</h4>
                 </div>
                 <div class="card-subtitle avenir-font-light">
-                   <h3>ID: {{site_id}}</h3>
+                   <h5>ID: {{site_id}}</h5>
+                </div>
+                <div class="card-text">
+                    These graphs are produced using Machine Learning to classify objects from the video stream. We provide
+                    an average of those counts per hour.
                 </div>
                 <div class="row mt-4">
                     <div class="col-3">
-                        <h5 class="d-inline-block">Object Count Selection </h5>
+                        <h5 class="d-inline-block">Object Count</h5>
                         <b-dropdown id="object_type_dropdown" :text="object_count_display_string" class="object_type_dropdown m-md-2">
                             <b-dropdown-item @click="objectTypeSelected($event, 'person', 'People')">People</b-dropdown-item>
                             <b-dropdown-item @click="objectTypeSelected($event, 'chair', 'Chairs')">Chairs</b-dropdown-item>
@@ -70,10 +74,13 @@
     import DataAPI from "../utilities/rest_api";
 
     import Highcharts from 'highcharts';
-    //import FeatureUtils from "../utilities/feature_funcs";
+    import EventUtils from "../utilities/analytics_funcs";
     import {DropdownPlugin, FormDatepickerPlugin} from 'bootstrap-vue';
     Vue.use(DropdownPlugin);
     Vue.use(FormDatepickerPlugin);
+
+    import {min,max,mean,median} from "simple-statistics";
+    Vue.use(min, max, mean, median);
 
     export default {
         name: 'CameraGraph',
@@ -86,8 +93,8 @@
         data()
         {
             return {
-                start_date: moment().subtract(7, 'days').format("YYYY-M-D"),
-                end_date: moment().format("YYYY-M-D"),
+                start_date: moment().subtract(7, 'days').format("YYYY-MM-DD"),
+                end_date: moment().format("YYYY-MM-DD"),
                 graph_id: "camera_graph",
                 site_description: '',
                 object_count_display_string: 'People',
@@ -103,7 +110,7 @@
                         enabled: false
                     },
                     title: {
-                        text: "Total Objects Detected Per Hour"
+                        text: "Average People Detected Per Hour"
                     },
                     colors: ['#333333'],
                     time: {
@@ -196,18 +203,21 @@
                 this.graph_data = [];
                 this.chart.series[0].setData(this.graph_data);
                 this.chart.yAxis[0].setTitle({ text: this.object_count_display_string + ' count'});
+                this.chart.setTitle({ text: "Average " + this.object_count_display_string + " Detected Per Hour"});
                 this.getCameraData(this.camera_name, this.object_count_type, this.start_date, this.end_date);
+
+                let label = this.camera_name + " " + this.object_count_type + " " + this.start_date + " " + this.end_date;
+
+                EventUtils.log_event(this.$gtag, 'graph', 'Camera Site', label, 0);
             },
             getCameraData(camera, object_type, start_date, end_date) {
                 console.log("Querying camera: :" + camera + ". Start: " + start_date +" End: " + end_date);
                 let vm=this;
                 vm;
-                //let start_date_obj = moment(start_date);
-                //let end_date_obj = moment(end_date);
                 DataAPI.GetCameraData(camera,
                     object_type,
-                    this.start_date, //start_date_obj.format("YYYY-M-D"),
-                    this.end_date)//end_date_obj.format("YYYY-M-D"))
+                    this.start_date,
+                    this.end_date)
                     .then(response => {
                         let data = response.data;
                         //This groups the data by time stamp counts.
@@ -230,7 +240,6 @@
                             }
 
                         }
-                        dSum;
 
                         let hour_counts = {};
                         //BUild an hourly summary
@@ -241,18 +250,22 @@
                                 hour_counts[cur_key] = [];
                                 let i = 0;
                                 while(i < 24) {
-                                    hour_counts[cur_key].push({count: 0, rec_count: 0});
+                                    //hour_counts[cur_key].push({count: 0, rec_count: 0});
+                                    //We build arrays for each hour to hold the counts per frame.
+                                    hour_counts[cur_key].push({counts: []});
                                     i++;
                                 }
                             }
                             let count_rec = hour_counts[cur_key];
                             let rec_hour = rec.m_date.get('hour');
-                            if(rec.object_count > 0) {
-                                count_rec[rec_hour]['count'] += rec.object_count;
-                                count_rec[rec_hour]['rec_count'] += 1;
-                            }
+                            count_rec[rec_hour]['counts'].push(rec.object_count);
+
+                            //if(rec.object_count > 0) {
+                            //count_rec[rec_hour]['count'] += rec.object_count;
+                            //count_rec[rec_hour]['rec_count'] += 1;
+                            //}
+
                         });
-                        hour_counts;
 
                         //Now we order the data for the graph. Probably can do this is the step above, but
                         //for now one more step.
@@ -269,11 +282,24 @@
                                }
                                let time_stamp_str = date_key  + ' ' + hour_str + ':00:00';
                                let time_stamp_obj = moment(time_stamp_str);
-                               let avg_hour_count = 0;
-                               if(obj_count['rec_count'] > 0) {
-                                   avg_hour_count = obj_count['count'] / obj_count['rec_count'];
+                               //let avg_hour_count = 0;
+
+                               //if(obj_count['rec_count'] > 0) {
+                               //    avg_hour_count = obj_count['count'] / obj_count['rec_count'];
+                               //}
+                               let median_count = 0;
+                               let avg_count = 0;
+                               let max_count = 0;
+                               if(obj_count.counts.length) {
+                                   let sorted = obj_count.counts.sort();
+                                   median_count = median(sorted);
+                                   avg_count = mean(sorted);
+                                   max_count = max(sorted)
                                }
-                               vm.graph_data.push([time_stamp_obj.valueOf(), avg_hour_count]);
+                               median_count;
+                               max_count;
+                               //console.log("Camera Stats. Avg: " + avg_count + " Median: " + median_count + " Max: " + max_count);
+                               vm.graph_data.push([time_stamp_obj.valueOf(), avg_count]);
                            })
                         }
                         vm.chart.series[0].setData(vm.graph_data);
