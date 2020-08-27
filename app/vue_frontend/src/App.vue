@@ -9,6 +9,7 @@
     import StationGraph from "@/components/station_graph";
     import CameraGraph from "@/components/camera_graph";
     import ErrorPage from "@/components/error_page";
+    import AboutPage from "@/components/about_page";
 
     export default {
         data () {
@@ -16,7 +17,7 @@
                 activeComponent: 'SplashPage'
             }
         },
-        components: {OLMapPage, SplashPage, StationGraph, CameraGraph, ErrorPage},
+        components: {OLMapPage, SplashPage, StationGraph, CameraGraph, ErrorPage, AboutPage},
         created() {
             //We check the url we receive to see where we are going, splash page or one of the project sites.
             let to = this.$route;
@@ -44,6 +45,10 @@
                 this.$store.commit('updateSiteName', to.params.location);
                 this.activeComponent = 'StationGraph';
             }
+            else if(to.name == 'AboutPage')
+            {
+                this.activeComponent = 'AboutPage';
+            }
         },
         watch: {
             '$route' (to, from) {
@@ -58,10 +63,6 @@
                     //API requests.
                     this.$store.commit('updateSiteName', to.params.location);
                     this.activeComponent = 'OLMapPage';
-                }
-                else if(to.name == 'SplashPage')
-                {
-                    this.activeComponent = 'SplashPage';
                 }
                 else if(to.name == 'StationGraph')
                 {
@@ -80,6 +81,14 @@
                 else if(to.name == '404')
                 {
                     this.activeComponent = 'ErrorPage';
+                }
+                else if(to.name == 'AboutPage')
+                {
+                    this.activeComponent = 'AboutPage';
+                }
+                else if(to.name == 'SplashPage')
+                {
+                    this.activeComponent = 'SplashPage';
                 }
             }
         },
@@ -125,6 +134,12 @@
     .background_color {
         background-color: rgba(0, 61, 126, .85);
         color: #FFFFFF
+    }
+    .blue-background_color {
+        background-color: rgba(0, 61, 126, .85);
+    }
+    .text-blue {
+        color: rgba(0, 61, 126, .85);
     }
 
 </style>

@@ -38,7 +38,7 @@
                     <a href="#" class="text-white card-link">Locations</a>
                 </p>
                 <p class="text-center">
-                    <a href="#" class="text-white card-link">About</a>
+                    <a href="/About" class="text-white card-link">About</a>
                 </p>
             </div>
         </nav>
@@ -634,10 +634,6 @@
 
 </style>
 <style scoped>
-    .blue-background_color {
-        background-color: rgba(0, 61, 126, .85);
-    }
-
     .wrapper {
         display: flex;
         width: 100%;

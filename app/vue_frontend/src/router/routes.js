@@ -2,12 +2,18 @@ import SplashPage from '@/components/splash_page'
 import OLMapPage from '@/components/ol_map_page'
 import StationGraph from '@/components/station_graph'
 import CameraGraph from '@/components/camera_graph'
-import  ErrorPage from '@/components/error_page'
+import ErrorPage from '@/components/error_page'
+import AboutPage from '@/components/about_page'
 const routes = [
         {
             path: '/',
             name: 'SplashPage',
             component: SplashPage
+        },
+        {
+            path: '/About',
+            name: 'AboutPage',
+            component: AboutPage
         },
         {
             path: '/:location/map',
