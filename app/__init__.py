@@ -42,12 +42,10 @@ def create_app(config_file):
 
   init_logging(app)
 
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-  app.config['CORS_HEADERS'] = 'Content-Type'
-  logging.getLogger('flask_cors').level = logging.DEBUG
-  logging.getLogger('flask_cors').disabled = False
   build_flask_admin(app)
   build_url_rules(app)
+  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+  app.config['CORS_HEADERS'] = 'Content-Type'
 
   return app
 
@@ -208,6 +206,8 @@ def init_logging(app):
   file_handler.setLevel(logging.DEBUG)
   file_handler.setFormatter(Formatter('%(asctime)s,%(levelname)s,%(module)s,%(funcName)s,%(lineno)d,%(message)s'))
   app.logger.addHandler(file_handler)
+  logging.getLogger('flask_cors').level = logging.DEBUG
+  logging.getLogger('flask_cors').disabled = False
 
   app.logger.debug("Logging initialized")
 
