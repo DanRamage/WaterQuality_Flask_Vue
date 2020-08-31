@@ -1397,7 +1397,8 @@ class SitesDataAPI(MethodView):
       else:
         sites = list(SITES_CONFIG.keys())
 
-        client_results = build_json_error(400, "Site: %s is not a vaild site. Valid sites: %s" % (sitename,sites))
+        results = build_json_error(400, "Site: %s is not a vaild site. Valid sites: %s" % (sitename,sites))
+        client_results = json.dumps(results)
 
     except Exception as e:
       current_app.logger.exception(e)

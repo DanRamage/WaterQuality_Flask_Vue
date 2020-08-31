@@ -42,9 +42,10 @@ def create_app(config_file):
 
   init_logging(app)
 
+  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+  app.config['CORS_HEADERS'] = 'Content-Type'
   build_flask_admin(app)
   build_url_rules(app)
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
   return app
 
