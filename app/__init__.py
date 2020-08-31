@@ -44,7 +44,8 @@ def create_app(config_file):
 
   build_flask_admin(app)
   build_url_rules(app)
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+  #cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+  cors = CORS(app)
   app.config['CORS_HEADERS'] = 'Content-Type'
 
   return app
