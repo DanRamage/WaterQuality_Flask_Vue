@@ -45,6 +45,7 @@ def create_app(config_file):
   cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
   app.config['CORS_HEADERS'] = 'Content-Type'
   logging.getLogger('flask_cors').level = logging.DEBUG
+  logging.getLogger('flask_cors').disabled = False
   build_flask_admin(app)
   build_url_rules(app)
 
