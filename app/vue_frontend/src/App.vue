@@ -131,12 +131,9 @@
 
     }
 
-    .background_color {
-        background-color: rgba(0, 61, 126, .85);
-        color: #FFFFFF
-    }
     .blue-background_color {
-        background-color: rgba(0, 61, 126, .85);
+        /*background-color: rgba(0, 61, 126, .85);*/
+        background-color: #2d5b92;
     }
     .text-blue {
         color: rgba(0, 61, 126, .85);

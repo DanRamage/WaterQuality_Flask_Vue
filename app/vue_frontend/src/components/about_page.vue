@@ -1,5 +1,39 @@
 <template>
     <div class="wrapper bg-white">
+        <SideBar PageTitleLink="Hows the Beach"
+                 PageName="About"
+                :sidebarActive="sidebarActive">
+            <template v-slot:sidebar-body>
+                <p class="text-left">
+                    Our mission is to... Alia quosa
+                    si conetur as sequibus, quae
+                    sam inimet verferat a sam aditat venimolloria volentiumqui restius sim as sin re, si dolest
+                    odis min nonsequunt laborit aectota tiatur moluptatent eostia doloruptaest volut alignat ut
+                    dolenda ecaecupti
+                </p>
+            </template>
+            <template v-slot:sidebar-navlinks>
+                <div>
+                    <p class="text-center mt-4">
+                        <a href="/" class="text-white card-link font-avenir"><h4>Forecast/Advisory</h4></a>
+                    </p>
+                    <p class="text-center mt-4">
+                        <a href="/" class="text-white card-link font-avenir"><h4>Bacteria Sources</h4></a>
+                    </p>
+                    <p class="text-center">
+                        <b-dropdown id="locations-droplist" toggle-class="locations_droplist font-avenir" dropright text="<h3>Locations</h3>" variant="primary">
+                            <b-dropdown-item href="/killdevilhills/map">OUTER BANKS</b-dropdown-item>
+                            <b-dropdown-item href="/myrtlebeach/map">MYRTLE BEACH</b-dropdown-item>
+                            <b-dropdown-item href="/surfside/map">SURFSIDE</b-dropdown-item>
+                            <b-dropdown-item href="/charleston/map">CHARLESTON HARBOR</b-dropdown-item>
+                            <b-dropdown-item href="/follybeach/map">FOLLY BEACH</b-dropdown-item>
+                            <b-dropdown-item href="/sarasota/map">SARASOTA</b-dropdown-item>
+                        </b-dropdown>
+                    </p>
+                </div>
+            </template>
+        </SideBar>
+        <!--
         <nav id="sidebar" v-bind:class="[sidebarActive ? 'active' : '']">
             <div class="h-100 px-5 py-4 montserat-font text-center text-white blue-background_color sidebar-opacity">
                 <a href="/">
@@ -15,40 +49,28 @@
                 </p>
 
                 <br>
-                <p class="text-center mt-4">
-                    <a href="/" class="text-white card-link">Forecast/Advisory</a>
-                </p>
-                <p class="text-center">
-                    <a href="/" class="text-white card-link">Bacteria Sources</a>
-                </p>
-                <p class="text-center">
-                    <a href="/" class="text-white card-link">Locations</a>
-                </p>
+                <div>
+                    <p class="text-center mt-4">
+                        <a href="/" class="text-white card-link font-avenir"><h4>Forecast/Advisory</h4></a>
+                    </p>
+                    <p class="text-center mt-4">
+                        <a href="/" class="text-white card-link font-avenir"><h4>Bacteria Sources</h4></a>
+                    </p>
+                    <p class="text-center">
+                        <b-dropdown id="locations-droplist" toggle-class="locations_droplist font-avenir" dropright text="<h3>Locations</h3>" variant="primary">
+                                <b-dropdown-item href="/killdevilhills/map">OUTER BANKS</b-dropdown-item>
+                                <b-dropdown-item href="/myrtlebeach/map">MYRTLE BEACH</b-dropdown-item>
+                                <b-dropdown-item href="/surfside/map">SURFSIDE</b-dropdown-item>
+                                <b-dropdown-item href="/charleston/map">CHARLESTON HARBOR</b-dropdown-item>
+                                <b-dropdown-item href="/follybeach/map">FOLLY BEACH</b-dropdown-item>
+                                <b-dropdown-item href="/sarasota/map">SARASOTA</b-dropdown-item>
+                            </b-dropdown>
+                    </p>
+                </div>
             </div>
         </nav>
+        -->
         <div id="content" class="ml-5 mt-5">
-            <!--
-            <b-card no-body class="mb-1">
-                <b-card-header header-tag="header" class="" role="">
-                    <b-button block v-b-toggle.accordion-1 variant="info" class="text-left bg-white text-blue">
-                        <span>
-                            <h2>What is How's the Beach?      <font-awesome-icon :icon="['fas', 'chevron-right']"></font-awesome-icon></h2>
-                        </span>
-                    </b-button>
-                </b-card-header>
-                <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
-                    <b-card-body>
-                        <b-card-text>
-                            How’s the Beach is tool that predicts bacterial conditions in public waters at four
-                            locations on the east coast of America. It is designed to inform the public of unsafe swimming
-                            conditions. How’s the Beach is a joint initiative of University of South Carolina,
-                            Southeast Coastal Ocean Observing Regional Association, and the Integration and Application
-                            Network at the University of Maryland Center for Environmental Science.
-                        </b-card-text>
-                    </b-card-body>
-                </b-collapse>
-            </b-card>
-            -->
             <div v-b-toggle.collapse-1 variant="outline-primary" class="text-blue avenir-font-light">
                 <span class="FAQ-text mr-4 font-weight-normal">What is How's the Beach?</span>
                 <span class="whatis-opened FAQ-text"><font-awesome-icon :icon="['fas', 'chevron-up']" /></span>
@@ -63,6 +85,26 @@
                         Southeast Coastal Ocean Observing Regional Association, and the Integration and Application
                         Network at the University of Maryland Center for Environmental Science.
                     </p>
+                    <h3 class="card-text text-blue avenir-font">Project Partners</h3>
+                    <div>
+                        <div class="row align-items-center">
+                            <div class="col-3">
+                            </div>
+                            <div class="col-3">
+                                <a href="https://sc.edu/study/colleges_schools/public_health/index.php" target="_blank">
+                                    <img src="@/assets/images/sc_logo.png" alt="" width="150" height="75">
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                <img src="@/assets/images/umces_logo.png" alt="" width="150" height="75">
+                            </div>
+                            <div class="col-3">
+                                <a href="https://secoora.org" target="_blank">
+                                    <img src="@/assets/images/secoora_logo.png" alt="" width="150" height="75">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </b-card>
             </b-collapse>
 
@@ -125,13 +167,12 @@
                     </p>
                 </b-card>
             </b-collapse>
-
         </div>
     </div>
 </template>
 <script>
     import Vue from 'vue'
-
+    import SideBar from '@/components/sidebar'
     import { library } from '@fortawesome/fontawesome-svg-core'
     import { faChevronRight, faChevronUp } from '@fortawesome/free-solid-svg-icons'
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -141,16 +182,54 @@
 
     export default {
         name: 'AboutPage',
+        components: {SideBar},
         props: [],
         data() {
-            return {}
+            return {
+                sidebarActive: false
+            }
         },
         mounted() {
             console.log("AboutPage mounted.");
+        },
+        methods: {
+            resizeHandler() {
+
+                for (var i = 0; i < this.mqSelectors.length; i++) {
+                    if(this.mqSelectors[i].offsetLeft > 0)
+                    {
+                        if (this.currMqIdx != i) {
+                            this.currMqIdx = i;
+                            break;
+                        }
+                    }
+                }
+                if(this.currMqIdx < 3)
+                {
+                    this.sidebarActive = false;
+                }
+
+            }
         }
     }
 
 </script>
+<style>
+    #locations-droplist  > .dropdown-menu {
+        background-color: #2d5b92 !important;
+    }
+    #locations-droplist li > .dropdown-item {
+        color: #FFFFFF;
+    }
+    #locations-droplist li > .dropdown-item:focus, .dropdown-item:hover {
+        background-color: #2d5b92;
+    }
+    .locations_droplist {
+        background-color: #2d5b92;
+        border-color: #2d5b92;
+        font-size: 1.5rem;
+    }
+</style>
 <style scoped>
     .wrapper {
         display: flex;
@@ -165,7 +244,9 @@
         display: none;
     }
 
-
+    .text-white {
+        color: #000000;
+    }
     #sidebar {
         min-width: 300px;
         max-width: 300px;
@@ -295,5 +376,4 @@
     .FAQ-text {
         font-size: 1.75rem;
     }
-
 </style>
