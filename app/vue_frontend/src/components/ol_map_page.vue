@@ -32,7 +32,7 @@
                 </b-dropdown>
                 <br>
                 <p class="text-center mt-4">
-                    <a href="#" class="text-white card-link">Bacteria Sources</a>
+                    <a href="" class="text-white card-link">Bacteria Sources</a>
                 </p>
                 <p class="text-center">
                     <a href="#" class="text-white card-link">Locations</a>
@@ -386,28 +386,31 @@
                     }
                     else if(site_type == 'Shellfish')
                     {
-                        //First check to see if our data is still fresh.
-                        let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
-                        if(dataFresh) {
-                            //Shellfish values are either true for closed or false for open.
-                            let value = properties[site_type].advisory.value;
-                            if (!value) {
+                        if(site_type in properties) {
+                            //First check to see if our data is still fresh.
+                            let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
+                            if (dataFresh) {
+                                //Shellfish values are either true for closed or false for open.
+                                let value = properties[site_type].advisory.value;
+                                if (!value) {
+                                    icon = new Icon({
+                                        src: ShellfishLowMarkerIcon,
+                                        scale: icon_scale
+                                    });
+                                }
+                                else {
+                                    icon = new Icon({
+                                        src: ShellfishHiMarkerIcon,
+                                        scale: icon_scale
+                                    });
+                                }
+                            }
+                            else {
                                 icon = new Icon({
-                                    src: ShellfishLowMarkerIcon,
-                                    scale: icon_scale
-                                });
-                            } else {
-                                icon = new Icon({
-                                    src: ShellfishHiMarkerIcon,
+                                    src: ShellfishNoneMarkerIcon,
                                     scale: icon_scale
                                 });
                             }
-                        }
-                        else {
-                            icon = new Icon({
-                                src: ShellfishNoneMarkerIcon,
-                                scale: icon_scale
-                            });
                         }
                         if(!(vm.legend_icons.includes('Shellfish'))) {
                             vm.legend_icons.push("Shellfish");

@@ -150,7 +150,9 @@
             <img src="@/assets/images/swimmer_icon_white.png" alt="" width="24" height="24">
           </b-col>
           <b-col class="my-auto" sm="1">
-            <h5 class="montserat-font text-white">LEARN MORE</h5>
+            <a href="/About">
+              <h5 class="montserat-font text-white"><i>LEARN MORE</i></h5>
+            </a>
           </b-col>
           <b-col cols="3">
           </b-col>

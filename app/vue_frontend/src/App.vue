@@ -10,6 +10,7 @@
     import CameraGraph from "@/components/camera_graph";
     import ErrorPage from "@/components/error_page";
     import AboutPage from "@/components/about_page";
+    import MyrtleBeachAboutPage from "@/components/MyrtleBeachAbout"
 
     export default {
         data () {
@@ -17,7 +18,7 @@
                 activeComponent: 'SplashPage'
             }
         },
-        components: {OLMapPage, SplashPage, StationGraph, CameraGraph, ErrorPage, AboutPage},
+        components: {OLMapPage, SplashPage, StationGraph, CameraGraph, ErrorPage, AboutPage, MyrtleBeachAboutPage},
         created() {
             //We check the url we receive to see where we are going, splash page or one of the project sites.
             let to = this.$route;
@@ -48,6 +49,10 @@
             else if(to.name == 'AboutPage')
             {
                 this.activeComponent = 'AboutPage';
+            }
+            else if(to.name == 'MyrtleBeachAboutPage')
+            {
+                this.activeComponent = 'MyrtleBeachAboutPage';
             }
         },
         watch: {
@@ -89,6 +94,10 @@
                 else if(to.name == 'SplashPage')
                 {
                     this.activeComponent = 'SplashPage';
+                }
+                else if(to.name == 'MyrtleBeachAboutPage')
+                {
+                    this.activeComponent = 'MyrtleBeachAboutPage';
                 }
             }
         },

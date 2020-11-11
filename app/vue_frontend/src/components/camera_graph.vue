@@ -126,7 +126,7 @@
                         },
                         type: 'datetime',
                         dateTimeLabelFormats : {
-                            day: '%e %b \'%y',
+                            day: '%a %e %b \'%y',
                             hour: "%I:%M %p"
                         },
                         /*

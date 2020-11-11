@@ -4,6 +4,8 @@ import StationGraph from '@/components/station_graph'
 import CameraGraph from '@/components/camera_graph'
 import ErrorPage from '@/components/error_page'
 import AboutPage from '@/components/about_page'
+import MyrtleBeachAboutPage from "@/components/MyrtleBeachAbout"
+
 const routes = [
         {
             path: '/',
@@ -35,6 +37,11 @@ const routes = [
 
             ]
 
+        },
+        {
+            path: '/About/MyrtleBeach',
+            name: 'MyrtleBeachAboutPage',
+            component: MyrtleBeachAboutPage
         },
         {
             path: '/page error',

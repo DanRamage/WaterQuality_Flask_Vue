@@ -25,7 +25,8 @@ const router = new VueRouter({
 import VueGtag from "vue-gtag";
 
 Vue.use(VueGtag, {
-  config: { id: "UA-16735125-3" }
+  //config: { id: "UA-16735125-3" }
+  config: { id: "UA-3652063-4" }
 });
 /*Vue.use(VueAnalytics, {
   //id: 'UA-16735125-2',

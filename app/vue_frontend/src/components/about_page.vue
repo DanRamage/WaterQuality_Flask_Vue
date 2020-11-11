@@ -1,15 +1,18 @@
 <template>
     <div class="wrapper bg-white">
-        <SideBar PageTitleLink="Hows the Beach"
-                 PageName="About"
-                :sidebarActive="sidebarActive">
-            <template v-slot:sidebar-body>
+        <SideBar :sidebarActive="sidebarActive">
+            <template v-slot:page-title-link>
+                Hows the Beach
+            </template>
+            <template v-slot:page-name>
+                About
+            </template>
+            <template v-slot:body-blurb>
                 <p class="text-left">
-                    Our mission is to... Alia quosa
-                    si conetur as sequibus, quae
-                    sam inimet verferat a sam aditat venimolloria volentiumqui restius sim as sin re, si dolest
-                    odis min nonsequunt laborit aectota tiatur moluptatent eostia doloruptaest volut alignat ut
-                    dolenda ecaecupti
+                    The How’s the Beach initiative will improve informed decision making about recreational
+                    use of coastal waters by fostering timely access to accurate water quality data and daily
+                    nowcasts of water quality conditions among (or for) resource managers, public health officials,
+                    and the general public.
                 </p>
             </template>
             <template v-slot:sidebar-navlinks>
@@ -33,43 +36,6 @@
                 </div>
             </template>
         </SideBar>
-        <!--
-        <nav id="sidebar" v-bind:class="[sidebarActive ? 'active' : '']">
-            <div class="h-100 px-5 py-4 montserat-font text-center text-white blue-background_color sidebar-opacity">
-                <a href="/">
-                    <h6><i><span v-text="title"></span></i></h6>
-                </a>
-                <h4><span>ABOUT</span></h4>
-                <p class="text-left">
-                    Our mission is to... Alia quosa
-                    si conetur as sequibus, quae
-                    sam inimet verferat a sam aditat venimolloria volentiumqui restius sim as sin re, si dolest
-                    odis min nonsequunt laborit aectota tiatur moluptatent eostia doloruptaest volut alignat ut
-                    dolenda ecaecupti
-                </p>
-
-                <br>
-                <div>
-                    <p class="text-center mt-4">
-                        <a href="/" class="text-white card-link font-avenir"><h4>Forecast/Advisory</h4></a>
-                    </p>
-                    <p class="text-center mt-4">
-                        <a href="/" class="text-white card-link font-avenir"><h4>Bacteria Sources</h4></a>
-                    </p>
-                    <p class="text-center">
-                        <b-dropdown id="locations-droplist" toggle-class="locations_droplist font-avenir" dropright text="<h3>Locations</h3>" variant="primary">
-                                <b-dropdown-item href="/killdevilhills/map">OUTER BANKS</b-dropdown-item>
-                                <b-dropdown-item href="/myrtlebeach/map">MYRTLE BEACH</b-dropdown-item>
-                                <b-dropdown-item href="/surfside/map">SURFSIDE</b-dropdown-item>
-                                <b-dropdown-item href="/charleston/map">CHARLESTON HARBOR</b-dropdown-item>
-                                <b-dropdown-item href="/follybeach/map">FOLLY BEACH</b-dropdown-item>
-                                <b-dropdown-item href="/sarasota/map">SARASOTA</b-dropdown-item>
-                            </b-dropdown>
-                    </p>
-                </div>
-            </div>
-        </nav>
-        -->
         <div id="content" class="ml-5 mt-5">
             <div v-b-toggle.collapse-1 variant="outline-primary" class="text-blue avenir-font-light">
                 <span class="FAQ-text mr-4 font-weight-normal">What is How's the Beach?</span>
@@ -177,7 +143,6 @@
     import { faChevronRight, faChevronUp } from '@fortawesome/free-solid-svg-icons'
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
     library.add(faChevronRight, faChevronUp)
-
     Vue.component('font-awesome-icon', FontAwesomeIcon);
 
     export default {
@@ -231,6 +196,12 @@
     }
 </style>
 <style scoped>
+    #content {
+        width: 100%;
+        min-height: 100vh;
+        transition: all 0.3s;
+    }
+
     .wrapper {
         display: flex;
         width: 100%;
@@ -242,136 +213,6 @@
     .collapsed > .whatis-opened,
     :not(.collapsed) > .whatis-closed {
         display: none;
-    }
-
-    .text-white {
-        color: #000000;
-    }
-    #sidebar {
-        min-width: 300px;
-        max-width: 300px;
-        background: #7386D5;
-        color: #fff;
-        transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
-        transform-origin: bottom left;
-    }
-
-    #sidebar.active {
-        margin-left: -300px;
-        transform: rotateY(100deg);
-    }
-
-    #sidebar .sidebar-header {
-        padding: 20px;
-        background: #6d7fcc;
-    }
-
-    #sidebar ul.components {
-        padding: 20px 0;
-        border-bottom: 1px solid #47748b;
-    }
-
-    #sidebar ul p {
-        color: #fff;
-        padding: 10px;
-    }
-
-    #sidebar ul li a {
-        padding: 10px;
-        font-size: 1.1em;
-        display: block;
-    }
-    #sidebar ul li a:hover {
-        color: #7386D5;
-        background: #fff;
-    }
-
-    #sidebar ul li.active > a, a[aria-expanded="true"] {
-        color: #fff;
-        background: #6d7fcc;
-    }
-
-    #sidebarCollapse {
-        width: 40px;
-        height: 40px;
-        background: #f5f5f5;
-    }
-
-    #sidebarCollapse span {
-        width: 80%;
-        height: 2px;
-        margin: 0 auto;
-        display: block;
-        background: #555;
-        transition: all 0.8s cubic-bezier(0.810, -0.330, 0.345, 1.375);
-    }
-    #sidebarCollapse span:first-of-type {
-        /* rotate first one */
-        transform: rotate(45deg) translate(2px, 2px);
-    }
-    #sidebarCollapse span:nth-of-type(2) {
-        /* second one is not visible */
-        opacity: 0;
-    }
-    #sidebarCollapse span:last-of-type {
-        /* rotate third one */
-        transform: rotate(-45deg) translate(1px, -1px);
-    }
-    #sidebarCollapse.active span {
-        /* no rotation */
-        transform: none;
-        /* all bars are visible */
-        opacity: 1;
-        margin: 5px auto;
-    }
-    #sidebarCollapse {
-        position: relative;
-        z-index: 1000;
-        top: 7em;
-        left: .75em;
-    }
-    #content {
-        width: 100%;
-        min-height: 100vh;
-        transition: all 0.3s;
-    }
-
-    .sidebar-opacity {
-        opacity: 0.9;
-    }
-    @media (max-width: 768px) {
-        #sidebar {
-            margin-left: -300px;
-        }
-        #sidebar.active {
-            margin-left: 0;
-        }
-        #sidebar.active {
-            margin-left: 0;
-            transform: none;
-        }
-        #sidebarCollapse span:first-of-type,
-        #sidebarCollapse span:nth-of-type(2),
-        #sidebarCollapse span:last-of-type {
-            transform: none;
-            opacity: 1;
-            margin: 5px auto;
-        }
-        #sidebarCollapse.active span {
-            margin: 0 auto;
-        }
-        #sidebarCollapse.active span:first-of-type {
-            transform: rotate(45deg) translate(2px, 2px);
-        }
-        #sidebarCollapse.active span:nth-of-type(2) {
-            opacity: 0;
-        }
-        #sidebarCollapse.active span:last-of-type {
-            transform: rotate(-45deg) translate(1px, -1px);
-        }
-    }
-    #mq-detector {
-        visibility: hidden;
     }
     .FAQ-text {
         font-size: 1.75rem;
