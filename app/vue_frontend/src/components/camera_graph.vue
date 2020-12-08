@@ -12,6 +12,10 @@
                 <div class="card-text">
                     These graphs are produced using Machine Learning to classify objects from the video stream. We provide
                     an average of those counts per hour.
+                    <span v-if="this.object_count_type == 'person'">
+                        <br>
+                        For People counts, due to data volumes, we are limited to 30 days of data retrieval.
+                    </span>
                 </div>
                 <div class="row mt-4">
                     <div class="col-3">
@@ -214,10 +218,24 @@
                 console.log("Querying camera: :" + camera + ". Start: " + start_date +" End: " + end_date);
                 let vm=this;
                 vm;
+                //For the moment, we need to limit data pull to only 30 days. Otherwise the server can potentially run
+                //out of memory.
+                if(object_type === 'person')
+                {
+                    let start = moment(start_date);
+                    let end = moment(end_date);
+                    let days_delta = end.diff(start, 'days');
+                    if(days_delta > 30)
+                    {
+                        end_date = start.add(30, 'days');
+                        //this.end_date = end_date;
+                        end_date = end_date.format("YYYY-MM-DD");
+                    }
+                }
                 DataAPI.GetCameraData(camera,
                     object_type,
-                    this.start_date,
-                    this.end_date)
+                    start_date,
+                    end_date)
                     .then(response => {
                         let data = response.data;
                         //This groups the data by time stamp counts.
