@@ -65,7 +65,7 @@ if not PYCHARM_DEBUG:
         'stations_directory': '/home/xeniaprod/feeds/follybeach/monitorstations',
         'camera_statistics': '',
         'shellfish_closures': '/home/xeniaprod/feeds/follybeach/shellfish/shellfish_closures.json',
-        'ripcurrents': '/home/xeniaprod/feeds/follybeach/nwsforecasts/forecasts.json',
+        'ripcurrents': '/home/xeniaprod/feeds/follybeach/ripcurrent/forecasts.json',
         'camera_rest':  {
           'url': 'https://www.floridaapdata.org/beach/response_beach.php'
         }
