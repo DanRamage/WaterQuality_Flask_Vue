@@ -74,6 +74,13 @@
                     </vl-overlay>
 
                 </vl-interaction-select>
+
+                <vl-layer-vector>
+                    <vl-source-vector ref="beach_forecast_vector"
+                                      :format-factory="kmlFormatFactory"
+                                        >
+                    </vl-source-vector>
+                </vl-layer-vector>
             </vl-map>
             <button
                     v-b-toggle.info-sidebar
@@ -131,6 +138,7 @@
     Vue.use(SelectInteraction);
     Vue.use(StyleFunc);
 
+    import KML from 'ol/format/KML'
 
     import 'vuelayers/lib/style.css' // needs css-loader
 
@@ -156,6 +164,7 @@
     import Style from 'ol/style/Style';
     import Icon from 'ol/style/Icon';
 
+    import axios from "axios"
     //SInce these are not in the template, we import them here. We use them in the javascript below when
     //determining which icon to use.
     import LowMarkerIcon from '@/assets/images/low_marker_25x25.png'
@@ -222,8 +231,17 @@
                 this.$refs.visible_lg,
                 this.$refs.visible_xlg
             ];
+            let url="https://www.weather.gov/source/chs/beachforecast/SRF.kml";
+            axios.get(url, {crossDomain: true})
+                .then(function(response) {
+                    response;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+            ;
 
-
+            this.$refs.beach_forecast_vector;
             this.current_layer_url = `https://mt0.google.com/vt/lyrs=${this.current_google_layer}&hl=en&x={x}&y={y}&z={z}`;
             let path = window.location.pathname;
             if (path.length) {
@@ -304,6 +322,7 @@
 
             },
             pointOnSurface: findPointOnSurface,
+
             siteStyleFactory() {
                 console.debug("siteStyleFactory started");
                 let vm = this;
@@ -481,6 +500,9 @@
                     return(icon_style);
                 };
                 return siteStyleFunction;
+            },
+            kmlFormatFactory() {
+              return new KML({crossOrigin: 'anonymous'});
             },
             dataTypeClick(data_type) {
                 console.debug("Data Type Button clicked: " + data_type);
