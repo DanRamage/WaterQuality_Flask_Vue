@@ -430,7 +430,7 @@
                         let dataFresh = FeatureUtils.isDataFresh(properties[site_type].advisory);
                         if(dataFresh) {
                             let value = properties[site_type].advisory.value;
-                            if (!value) {
+                            if (value == 'LOW') {
                                 icon = new Icon({
                                     src: RipCurrentLowMarkerIcon,
                                     scale: icon_scale
