@@ -20,6 +20,9 @@
                     <b v-if="isDataFresh == false" class="ml-2 avenir-font-light text-danger">RESULTS ARE OUT OF DATE</b>
                 </p>
             </b-card-text>
+            <b-card-text>
+                Forecast provided by <a href='https://www.weather.gov/forecastmaps'>NWS</a>
+            </b-card-text>
 
         </b-card>
     </div>
@@ -80,6 +83,16 @@
                 if(site_type in this.feature.properties) {
                     if('advisory' in this.feature.properties[site_type]) {
                         return(this.feature.properties[site_type].advisory.value);
+                    }
+                }
+                return("");
+            },
+            getDescription: function() {
+                console.debug("description started.");
+                let site_type = this.feature.properties.site_type;
+                if(site_type in this.feature.properties) {
+                    if('advisory' in this.feature.properties[site_type]) {
+                        return(this.feature.properties[site_type].advisory.description);
                     }
                 }
                 return("");
