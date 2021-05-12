@@ -44,7 +44,7 @@ if not PYCHARM_DEBUG:
         'prediction_file': '/home/xeniaprod/feeds/fl_wq/Predictions.json',
         'advisory_file': '/home/xeniaprod/feeds/fl_wq/monitorstations/beachAdvisoryResults.json',
         'stations_directory': '/home/xeniaprod/feeds/fl_wq/monitorstations',
-        'ripcurrents': '/home/xeniaprod/feeds/fl_wq/ripcurrent/forecasts.json'
+        'ripcurrents': '/home/xeniaprod/feeds/fl_wq/nwsforecasts/forecasts.json'
   },
     'charleston':
       {
