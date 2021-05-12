@@ -26,8 +26,8 @@ import VueGtag from "vue-gtag";
 
 Vue.use(VueGtag, {
   //config: { id: "UA-16735125-3" }
-  config: { id: "UA-3652063-4" }
-});
+  config: { id: "UA-3652063-4" },
+},router);
 /*Vue.use(VueAnalytics, {
   //id: 'UA-16735125-2',
   id: 'UA-16735125-3',
