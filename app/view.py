@@ -1264,20 +1264,36 @@ class SitesDataAPI(MethodView):
 
   def create_rip_current_properties(self, sitename, ripcurrents_data, site_rec, data_timeout):
     try:
-      if sitename in ripcurrents_data:
-        #features = ripcurrents_data['features']
-        #ndx = locate_element(features, lambda data: data['properties']['description'] == site_rec.site_name)
-        forecasts = ripcurrents_data[sitename]
-        properties = {
-          'station': site_rec.site_name,
-          'advisory': {
-            'date': forecasts['date'],
-            'value': forecasts['riprisk'].upper(),
-            'flag': forecasts['riprisk'].upper(),
-            'hours_data_valid': data_timeout
-            }
-        }
-        return properties
+      #For the time being handle follybeach different than sarasota.
+      if sitename == 'follybeach':
+        if sitename in ripcurrents_data:
+          #features = ripcurrents_data['features']
+          #ndx = locate_element(features, lambda data: data['properties']['description'] == site_rec.site_name)
+          forecasts = ripcurrents_data[sitename]
+          properties = {
+            'station': site_rec.site_name,
+            'advisory': {
+              'date': forecasts['date'],
+              'value': forecasts['riprisk'].upper(),
+              'flag': forecasts['riprisk'].upper(),
+              'hours_data_valid': data_timeout
+              }
+          }
+      #For sarasota the rip current "stations" are used as the key into the nws file.
+      elif sitename == 'sarasota':
+        if site_rec.site_name.lower() in ripcurrents_data:
+          forecasts = ripcurrents_data[site_rec.site_name.lower()]
+          properties = {
+            'station': site_rec.site_name,
+            'advisory': {
+              'date': forecasts['date'],
+              'value': forecasts['riprisk'].upper(),
+              'flag': forecasts['riprisk'].upper(),
+              'hours_data_valid': data_timeout
+              }
+          }
+
+      return properties
     except Exception as e:
       current_app.logger.exception(e)
     return None
