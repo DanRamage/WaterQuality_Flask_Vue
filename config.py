@@ -1,7 +1,7 @@
 import os
 
-FLASK_DEBUG = False
-PYCHARM_DEBUG= False
+FLASK_DEBUG = True
+PYCHARM_DEBUG= True
 # Create dummy secrey key so we can use sessions
 SECRET_KEY = '123456790'
 SECRET_KEY_FILE = 'secret_key'
@@ -103,7 +103,7 @@ else:
         'stations_directory': '/Users/danramage/Documents/workspace/WaterQuality/FollyBeach-WaterQuality/data/test_outputs/',
         'camera_statistics': '/Users/danramage/Documents/workspace/WaterQuality/FollyBeach-WaterQuality/data/camera/summary_data.json',
         'shellfish_closures': '/Users/danramage/Documents/workspace/WaterQuality/FollyBeach-WaterQuality/data/shellfish/shellfish_closures.json',
-        'ripcurrents': '/Users/danramage/tmp/wq_feeds/sc_folly_beach/CHS1.json'
+        'ripcurrents': '/Users/danramage/tmp/wq_feeds/sc_folly_beach/forecasts.json'
       },
     'sarasota':
       {

@@ -82,7 +82,7 @@
               </template>
             </b-carousel-slide>
             <b-carousel-slide
-                    caption="Myrle Beach"
+                    caption="Myrtle Beach"
                     text="South Carolina"
               >
               <template v-slot:img>
