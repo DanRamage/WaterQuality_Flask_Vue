@@ -1262,21 +1262,20 @@ class SitesDataAPI(MethodView):
       current_app.logger.exception(e)
     return None
 
-  def create_rip_current_properties(self, ripcurrents_data, site_rec, data_timeout):
+  def create_rip_current_properties(self, sitename, ripcurrents_data, site_rec, data_timeout):
     try:
-      features = ripcurrents_data['features']
-      ndx = locate_element(features, lambda data: data['properties']['description'] == site_rec.site_name)
-
-      if ndx != -1:
-        site_data = features[ndx]['properties']
+      if sitename in ripcurrents_data:
+        #features = ripcurrents_data['features']
+        #ndx = locate_element(features, lambda data: data['properties']['description'] == site_rec.site_name)
+        forecasts = ripcurrents_data[sitename]
         properties = {
           'station': site_rec.site_name,
           'advisory': {
-            'date': site_data['date'],
-            'value': site_data['level'],
-            'flag': site_data['flag'],
+            'date': forecasts['date'],
+            'value': forecasts['riprisk'].upper(),
+            'flag': forecasts['riprisk'].upper(),
             'hours_data_valid': data_timeout
-          }
+            }
         }
         return properties
     except Exception as e:
@@ -1379,7 +1378,7 @@ class SitesDataAPI(MethodView):
 
           elif site_type == 'Rip Current' and ripcurrents_data is not None:
             data_timeout = SITE_TYPE_DATA_VALID_TIMEOUTS[site_type]
-            property = self.create_rip_current_properties(ripcurrents_data, site_rec, data_timeout)
+            property = self.create_rip_current_properties(sitename, ripcurrents_data, site_rec, data_timeout)
             if property is not None:
               properties[site_type] = property
           elif site_type == 'Camera Site':

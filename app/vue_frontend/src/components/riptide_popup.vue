@@ -55,7 +55,7 @@
                 if(dataFresh) {
                     if (site_type in this.feature.properties) {
                         let value = this.feature.properties[site_type].advisory.value;
-                        if (value == 'HIGH') {
+                        if (value == 'HIGH' || value == 'MODERATE') {
                             img_src = high_marker;
                         } else {
                             img_src = low_marker;
