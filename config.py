@@ -43,8 +43,9 @@ if not PYCHARM_DEBUG:
       {
         'prediction_file': '/home/xeniaprod/feeds/fl_wq/Predictions.json',
         'advisory_file': '/home/xeniaprod/feeds/fl_wq/monitorstations/beachAdvisoryResults.json',
-        'stations_directory': '/home/xeniaprod/feeds/fl_wq/monitorstations'
-      },
+        'stations_directory': '/home/xeniaprod/feeds/fl_wq/monitorstations',
+        'ripcurrents': '/home/xeniaprod/feeds/fl_wq/ripcurrent/forecasts.json'
+  },
     'charleston':
       {
         'prediction_file': '/home/xeniaprod/feeds/charleston/Predictions.json',
@@ -64,7 +65,7 @@ if not PYCHARM_DEBUG:
         'stations_directory': '/home/xeniaprod/feeds/follybeach/monitorstations',
         'camera_statistics': '',
         'shellfish_closures': '/home/xeniaprod/feeds/follybeach/shellfish/shellfish_closures.json',
-        'ripcurrents': '/home/xeniaprod/feeds/follybeach/ripcurrent/forecasts.json',
+        'ripcurrents': '/home/xeniaprod/feeds/follybeach/nwsforecasts/forecasts.json',
         'camera_rest':  {
           'url': 'https://www.floridaapdata.org/beach/response_beach.php'
         }
@@ -109,8 +110,9 @@ else:
       {
         'prediction_file': '/Users/danramage/tmp/wq_feeds/fl_wq/Predictions.json',
         'advisory_file': '/Users/danramage/tmp/wq_feeds/fl_wq/monitorstations/beachAdvisoryResults.json',
-        'stations_directory': '/Users/danramage/tmp/wq_feeds/feeds/fl_wq/monitorstations'
-      },
+        'stations_directory': '/Users/danramage/tmp/wq_feeds/feeds/fl_wq/monitorstations',
+        'ripcurrents': '/Users/danramage/tmp/wq_feeds/sarasota/forecasts.json'
+  },
 
   }
 
