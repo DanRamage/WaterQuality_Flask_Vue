@@ -1,7 +1,7 @@
 <template>
     <div id="ripcurrent-popup">
         <b-card class="wq-card"
-                header="Rip Current Prediction Site"
+                header="Rip Current Model Guidance Site"
                 header-tag="header">
             <b-card-title class="font-avenir">
                 <img :src="getAdvisoryImage()" style="height: 25px;width: 25px">
@@ -12,7 +12,7 @@
             <b-card-text class="mt-3">
                 <p>
                     <span class="font-avenir">
-                        <b>Rip Current Prediction: {{getAdvisory}}</b>
+                        <b>Rip Current Model Guidance: {{getAdvisory}}</b>
                     </span>
                     <br>
                     <span class="ml-2 avenir-font-light">Date: {{advisoryDate}}</span>
@@ -21,7 +21,12 @@
                 </p>
             </b-card-text>
             <b-card-text>
-                Forecast provided by <a href='https://www.weather.gov/forecastmaps'>NWS</a>
+                <div class="ripcurrent-disclaimer">
+                    <small>
+                            Rip Current Model Guidance provided by the National Weather Service. For official
+                            Rip Current Forecasts visit the local NWS Weather Forecast Office.
+                    </small>
+                </div>
             </b-card-text>
 
         </b-card>
@@ -101,7 +106,7 @@
                 console.debug("advisoryDate started.");
                 let site_type = this.feature.properties.site_type;
                 if(site_type in this.feature.properties) {
-                    var date = moment(this.feature.properties[site_type].advisory.date).format("MMMM Do YYYY hh:mm a");
+                    var date = moment(this.feature.properties[site_type].advisory.date).format("MMMM Do YYYY @ hh:mm a");
                     return(date);
                 }
                 console.debug("advisoryDate is false.");
@@ -131,12 +136,14 @@
     }
     #ripcurrent-popup div .card-title
     {
-        font-size: 1.0rem
+        font-size: 1.0rem;
     }
     #ripcurrent-popup div .card-subtitle
     {
         font-size: 1.0rem
     }
-
+    .ripcurrent-disclaimer {
+        width: 250px;
+    }
 
 </style>
