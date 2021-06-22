@@ -1276,6 +1276,8 @@ class SitesDataAPI(MethodView):
               'date': forecasts['date'],
               'value': forecasts['riprisk'].upper(),
               'flag': forecasts['riprisk'].upper(),
+              'wfo':  forecasts['wfo'],
+              'description': site_rec.description,
               'hours_data_valid': data_timeout
               }
           }
@@ -1289,6 +1291,7 @@ class SitesDataAPI(MethodView):
               'date': forecasts['date'],
               'value': forecasts['riprisk'].upper(),
               'flag': forecasts['riprisk'].upper(),
+              'description': site_rec.description,
               'hours_data_valid': data_timeout
               }
           }
