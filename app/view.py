@@ -1292,6 +1292,8 @@ class SitesDataAPI(MethodView):
               'date': forecasts['date'],
               'value': forecasts['riprisk'].upper(),
               'flag': forecasts['riprisk'].upper(),
+              'wfo_url':  forecasts['wfo_url'],
+              'guidance_url': forecasts['guidance_url'],
               'description': site_rec.description,
               'hours_data_valid': data_timeout
               }
