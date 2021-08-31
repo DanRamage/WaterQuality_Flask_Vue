@@ -23,8 +23,8 @@
             <b-card-text>
                 <div class="ripcurrent-disclaimer">
                     <small>
-                            Rip Current Model Guidance provided by the National Weather Service. For official
-                            Rip Current Forecasts visit the local NWS Weather Forecast Office.
+                        <a :href="getGuidanceLink" target="_blank">Rip Current Model Guidance</a> provided by the National Weather Service. For official
+                        Rip Current Forecasts visit the local <a :href="getWFOLink" target="_blank">NWS Weather Forecast Office</a>.
                     </small>
                 </div>
             </b-card-text>
@@ -88,6 +88,30 @@
                 if(site_type in this.feature.properties) {
                     if('advisory' in this.feature.properties[site_type]) {
                         return(this.feature.properties[site_type].advisory.value);
+                    }
+                }
+                return("");
+            },
+            getWFOLink: function() {
+                console.debug("getWFOLink started.");
+                let site_type = this.feature.properties.site_type;
+                if(site_type in this.feature.properties) {
+                    if('advisory' in this.feature.properties[site_type]) {
+                        if('wfo_url' in this.feature.properties[site_type].advisory) {
+                            return (this.feature.properties[site_type].advisory.wfo_url);
+                        }
+                    }
+                }
+                return("");
+            },
+            getGuidanceLink: function() {
+                console.debug("getGuidanceLink started.");
+                let site_type = this.feature.properties.site_type;
+                if(site_type in this.feature.properties) {
+                    if('advisory' in this.feature.properties[site_type]) {
+                        if('guidance_url' in this.feature.properties[site_type].advisory) {
+                            return (this.feature.properties[site_type].advisory.guidance_url);
+                        }
                     }
                 }
                 return("");

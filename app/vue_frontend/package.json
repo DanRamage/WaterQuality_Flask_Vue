@@ -27,7 +27,7 @@
     "vue-gtag": "^1.7.0",
     "vue-router": "^3.3.2",
     "vue2-leaflet": "^2.5.2",
-    "vuelayers": "^0.11.22",
+    "vuelayers": "^0.11.35",
     "vuex": "^3.1.3"
   },
   "devDependencies": {
